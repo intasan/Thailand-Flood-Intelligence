@@ -62,3 +62,7 @@ The dashboard accepts one WGS84 longitude/latitude Polygon, either as geometry, 
 Share links contain only a selected point, rounded to six decimal places, in the URL fragment. They contain neither parcels nor risk conclusions. Anyone receiving the link can read the location; the link opens on the same installation and submits its point for assessment.
 
 Station history uses actual returned observations. Chart lines break at invalid values or intervals longer than 15 minutes; missing values are never filled. Display times use Asia/Bangkok (UTC+7). CSV exports preserve original offset-bearing timestamps, station datum, raw-file hash, source URL, source quality flag and timestamp-status metadata where supplied. Formula-like text is escaped for spreadsheet safety; numeric negative water levels remain numeric. Archive timestamp assumptions remain those recorded by the importer. The graph is station water level, not property flood depth.
+
+
+## River-network preflight
+See [RIVER_NETWORK.md](RIVER_NETWORK.md) for the offline input contract, original-source checksum verification and upstream/downstream structural audit. No network is approved, persisted or served automatically. This is a preprocessing check, not a flow or inundation model.
