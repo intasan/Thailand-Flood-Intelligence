@@ -82,3 +82,14 @@ All four jobs completed successfully:
 Imported GeoJSON is not considered valid until the API accepts its topology. Coordinate links disclose the selected point to recipients; no parcel boundary or risk result is embedded. Station charts show actual returned history in Thai time, never filled values or inferred property flood depth. CSV preserves supplied source and timestamp-assumption metadata.
 
 Browser interaction, WebGL/GPS and visual QA remain unexecuted. No deployment was performed. There is still no live gauge feed, surveyed/calibrated operational hydraulic pilot or property flood-risk forecast. Passing software checks does not establish hydrologic validity.
+
+## River-network preflight — audit v1.0.0
+Tested code commit: `2e8f0c49f01696f63645084091c27ec35e4f16d8`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39303583056
+All four jobs passed:
+- Backend: 72 passed with real PostGIS (local: 68 passed, 4 database skips). The 19 new synthetic-fixture cases cover confluence area accumulation, unknown/zero areas, missing or duplicate links, reversed geometry, cycles, invalid coordinates/numbers/provenance, explicit outlets, long 1,100-reach traversal, endpoint tolerance, CLI raw-source/package hashes and rejection without stdout on corrupt/mismatched input.
+- Frontend: existing 20 tests and production build passed; no frontend source changes in this increment.
+- Compose: full db/API/web smoke checks and actual HII archive import/query passed.
+- Pipeline: Airflow image and DAG import checks passed.
+
+The CLI is an offline preprocessing tool only; it performs structural validation and incremental-area accumulation, not discharge routing or inundation. No real Thai network has been registered or independently verified. Provenance-field presence and a matching source checksum do not authenticate source rights or flow direction. Catchment overlap cannot be checked without polygons. One-downstream acyclic representation excludes bifurcations and reversing/tidal flow. The audit does not approve any hydraulic model, infer property accessibility or enable public risk results. No deployment was performed. Browser/WebGL/GPS QA and an operational independently validated hydraulic pilot remain outstanding.
