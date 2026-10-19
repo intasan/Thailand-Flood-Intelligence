@@ -35,6 +35,9 @@ def ready():
     try:
         with psycopg.connect(os.environ["DATABASE_URL"], connect_timeout=3) as c:
             c.execute("SELECT PostGIS_Version()")
+            c.execute("SELECT 1 FROM sources LIMIT 1")
+            c.execute("SELECT 1 FROM stations LIMIT 1")
+            c.execute("SELECT 1 FROM observations LIMIT 1")
     except Exception:
         raise HTTPException(503, "PostGIS unavailable")
     return {"status": "ready"}
@@ -89,6 +92,9 @@ def stations(lat: float = Query(ge=-90,le=90,allow_inf_nan=False), lon: float = 
 
 @app.get("/v1/models/point")
 def model_point(lat: float = Query(ge=-90,le=90,allow_inf_nan=False), lon: float = Query(ge=-180,le=180,allow_inf_nan=False), at: str | None = None):
-    from .models import model_point as sample, ModelRejected
+    from .models import model_point as sample, ModelRejected, timestamp
+    if at:
+        try: timestamp(at)
+        except ValueError:raise HTTPException(422,"Timezone-aware ISO8601 timestamp required")
     try: return sample(lat,lon,at)
-    except (ModelRejected,ValueError):raise HTTPException(422,"Invalid timestamp or model package")
+    except ModelRejected:raise HTTPException(503,"Model output failed quality checks")

@@ -34,3 +34,18 @@ def test_network_order_and_cycle():
 def test_readiness_not_liveness():
     assert c.get("/health/live").status_code==200
     assert c.get("/health/ready").status_code==503
+
+def test_database_unavailable_is_not_zero_count(monkeypatch):
+    monkeypatch.delenv('DATABASE_URL',raising=False)
+    result=c.get('/v1/status').json()
+    assert result['database']=='unavailable' and result['observation_count'] is None
+
+def test_geodesic_parcel_area():
+    g={'type':'Polygon','coordinates':[[[100,13],[100.001,13],[100.001,13.001],[100,13.001],[100,13]]]}
+    result=c.post('/v1/parcels/assess',json={'geometry':g}).json()
+    assert 11000<result['area_m2']<13000 and result['risk']=='unknown'
+
+def test_model_unknown_without_files(tmp_path,monkeypatch):
+    monkeypatch.setenv('MODEL_DIRECTORY',str(tmp_path))
+    result=c.get('/v1/models/point?lat=13&lon=100').json()
+    assert result['status']=='unsupported' and result['flood_depth_m'] is None

@@ -1,7 +1,9 @@
 FROM python:3.12-slim
+RUN apt-get update && apt-get install -y --no-install-recommends libexpat1 libstdc++6 && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN python -c "import rasterio, pyproj, psycopg"
 COPY app app
 RUN mkdir -p /app/cache /app/models && chown -R 10001:10001 /app/cache /app/models
 USER 10001

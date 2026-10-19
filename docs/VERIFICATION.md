@@ -25,3 +25,6 @@ Tests and frontend compilation do not establish operational hydrologic validity.
 - Real source smoke: geocoding returned Thai Bangkok candidates; elevation endpoint returned a Copernicus DSM response for 13.75,100.5. This verifies connectivity only, not survey accuracy or a flood forecast.
 - New CI jobs test PostGIS import rollback/idempotency and spatial lookup, build/start Compose with public data disabled, check database readiness/Next proxy/OpenAPI, and build Airflow and import DAGs. Final CI outcome is recorded after the run completes.
 - No hydrologic pilot, independently validated operational model or hosted deployment. Browser interaction QA remains unexecuted in this environment.
+
+- First v0.2 CI: backend/PostGIS, frontend and Airflow succeeded. Compose found Rasterio missing libexpat.so.1 in python:3.12-slim. Dockerfile now installs libexpat1/libstdc++6 and verifies GIS imports during build; full rerun pending.
+- Additional local regression cases passed: null counts when database unavailable, geodesic parcel area, and unsupported model coverage. Local total: 25 passed, 2 PostGIS skips.

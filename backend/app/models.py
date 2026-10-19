@@ -21,6 +21,7 @@ def validate_manifest(path):
         for k in ('model_version','solver','vertical_datum','input_manifest_sha256','generated_at','valid_from','valid_to','resolution_m','uncertainty','input_provenance'):
             if not m.get(k):raise ModelRejected(f'Missing {k}')
         timestamp(m['generated_at'])
+        if not math.isfinite(float(m['resolution_m'])) or float(m['resolution_m'])<=0:raise ModelRejected('Invalid model resolution')
         if timestamp(m['valid_to'])<=timestamp(m['valid_from']):raise ModelRejected('Invalid validity interval')
         if m['depth_semantics']!='maximum_over_valid_interval':raise ModelRejected('Unsupported depth semantics')
         v=m['validation']
@@ -76,6 +77,7 @@ def model_point(lat,lon,at=None):
         depth=sample_asset(path.parent/m['assets']['max_depth']['path'],lat,lon)
         if depth is None:continue
         duration=sample_asset(path.parent/m['assets']['duration']['path'],lat,lon) if 'duration' in m['assets'] else None
+        if duration is not None and duration>(timestamp(m['valid_to'])-timestamp(m['valid_from'])).total_seconds()/3600:raise ModelRejected('Duration exceeds event interval')
         return {'status':'available','flood_depth_m':depth,'duration_hours':duration,'risk':'not_classified',
             'metadata':{k:m[k] for k in ('model_version','solver','generated_at','valid_from','valid_to','vertical_datum','resolution_m','depth_semantics','uncertainty','validation','input_provenance')},
             'limitations':['ความลึกสูงสุดตลอดช่วงเหตุการณ์ ไม่ใช่ระดับน้ำ ณ เวลาที่ขอ','ยังไม่มีเกณฑ์จัดระดับความเสี่ยงต่อทรัพย์สิน']}
