@@ -20,7 +20,9 @@ def test_self_intersection():
     g={"type":"Polygon","coordinates":[[[100,13],[101,14],[100,14],[101,13],[100,13]]]}
     assert c.post("/v1/parcels/assess",json={"geometry":g}).status_code==422
 
-def test_geocoder_explicit_failure(): assert c.get("/v1/geocode?q=Bangkok").status_code==503
+def test_geocoder_explicit_failure(monkeypatch):
+    monkeypatch.setenv("PUBLIC_DATA_ENABLED","false")
+    assert c.get("/v1/geocode?q=Bangkok").status_code==503
 
 def test_observation_rejects_missing_datum():
     with pytest.raises(ValueError): validate_observation({"value":1})

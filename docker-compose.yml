@@ -16,6 +16,12 @@ services:
     build: ./backend
     environment:
       DATABASE_URL: postgresql://flood:${POSTGRES_PASSWORD}@db:5432/flood
+      PROVIDER_CACHE_PATH: /app/cache/providers.sqlite
+      PUBLIC_DATA_ENABLED: ${PUBLIC_DATA_ENABLED:-true}
+      MODEL_DIRECTORY: /app/models
+    volumes:
+      - providercache:/app/cache
+      - ./data/models:/app/models:ro
     ports: ["127.0.0.1:8000:8000"]
     depends_on:
       db:
@@ -27,11 +33,14 @@ services:
     ports: ["127.0.0.1:3000:3000"]
     depends_on: [api]
   airflow:
-    image: apache/airflow:2.10.5
+    build:
+      context: .
+      dockerfile: pipelines/Dockerfile
     profiles: ["pipeline"]
     command: standalone
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      DATABASE_URL: postgresql://flood:${POSTGRES_PASSWORD}@db:5432/flood
     ports: ["127.0.0.1:8080:8080"]
     volumes:
       - ./pipelines/dags:/opt/airflow/dags:ro
@@ -40,3 +49,4 @@ services:
 volumes:
   pgdata:
   airflowdata:
+  providercache:

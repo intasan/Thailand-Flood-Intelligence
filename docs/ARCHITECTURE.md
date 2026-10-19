@@ -12,3 +12,6 @@ Calibrate on one historical event; independently validate on another. Before eva
 
 ## Security and privacy
 No server-side fetching of arbitrary Google URLs. GPS/parcel coordinates are sent only for requested assessment, not persisted by application code. Avoid coordinate request-body logging in deployment. Limit vertices/request size at a reverse proxy before public use. Public deployment additionally needs TLS, rate limiting, access control for ingestion, retention policy, backups and monitoring. Credentials remain environment-only.
+
+## v0.2 implemented additions
+Read-only geocoding and coarse DSM source adapters via Open-Meteo, with bounded upstream access and SQLite caching; station data queries against PostGIS; offline approved-file Airflow ingestion; read-only reviewed hydraulic raster-package gates. These do not implement a 1D/2D solver. Public assessment continues to return unknown rather than quietly treating point DEM differences or nearby station values as flood depth. Optional reviewed model output is accessible through a distinct Research endpoint, with maximum-over-event semantics and unknown property risk.

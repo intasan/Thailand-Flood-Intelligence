@@ -1,18 +1,20 @@
-# Research API v0.1
-Run FastAPI and open http://localhost:8000/docs (Swagger), /redoc or /openapi.json.
+# Research API v0.2
+Swagger http://localhost:8000/docs · same-origin docs http://localhost:3000/research · schema /api/openapi.json
 
-- GET /health/live: process liveness.
-- GET /health/ready: PostGIS connectivity; 503 if unavailable.
-- GET /v1/status: actual empty-data coverage status.
-- POST /v1/assess: {"lat":13.75,"lon":100.5}; WGS84 point.
-- POST /v1/parcels/assess: {"geometry":{"type":"Polygon","coordinates":[[[100,13],[101,13],[101,14],[100,13]]]}}; validates geometry only, no parcel-wide calculation.
-- GET /v1/geocode?q=...: 503 until a licensed/self-hosted provider is implemented.
+| Endpoint | Contract |
+|---|---|
+| GET /health/live | Process liveness only |
+| GET /health/ready | Checks PostGIS connectivity, 503 if missing |
+| GET /v1/status | Actual database counts or explicit unavailable/null, approved model package count and validity periods |
+| GET /v1/geocode?q=Bangkok | Thai settlements/postcodes from GeoNames via Open-Meteo; user chooses candidate; empty matches stay empty; failures 503 |
+| GET /v1/elevation?lat=13.75&lon=100.5 | Approx. 90 m Copernicus DSM; source, release, fetch time, EGM2008, limits; no local survey or house-ground claim |
+| GET /v1/stations?lat=13&lon=100&radius_km=20 | Approved nearby stations (max 30), latest observations, source, datum, checksum, age. Station reading is not property water level |
+| POST /v1/assess | JSON lat/lon; unknown flood risk until operational model integration |
+| POST /v1/parcels/assess | Valid WGS84 Polygon, max 1000 vertices including holes. Geodesic area/perimeter and geometry; no centroid-only parcel flood inference |
+| GET /v1/models/point?lat=13&lon=100&at=2026-01-01T00:00:00Z | Read-only reviewed raster package serving. Defaults to current UTC. Explicit maximum-over-event depth semantics; unsupported coverage/time/NoData stays null. No automatic asset-risk category |
 
-Assessment response: status unsupported; risk unknown; elevation, water level, depth, duration null. Metadata includes UTC generated_at, null observed_at and valid_at, empty provenance, null model_version, not_validated status, null resolution/datum and not_quantified uncertainty. A timestamp of response generation is never an observation timestamp. No false numerical confidence intervals.
+Assessment metadata: UTC generated_at is response time, not an observation timestamp. Missing observations, model versions, uncertainty or datums remain null/not_validated. No numeric confidence interval without evidence.
 
-Future approved model result serving must check coverage, valid time, validation approval, input provenance and compatible vertical datums. Database schema alone does not enable publication.
+Public provider adapters use cache and single-host shared quotas, never arbitrary fetch URLs. They can be disabled with PUBLIC_DATA_ENABLED=false. Source timestamps and dataset release are distinguished. Seven-day cached fetch time is displayed; no claim of a new terrain survey.
 
-## Operator local-file import
-From backend: `python -m app.ingest /absolute/observations.csv /absolute/manifest.json` with DATABASE_URL set. CSV fields: station_id, observed_at (timezone-aware ISO8601), value, unit (m). Manifest: source_id, source_url, license_evidence, vertical_datum, approved_by, approval_status=approved. Source and stations must already be independently approved in PostGIS. Import verifies matching source license and station datum; a transaction makes the batch atomic, and duplicate station/timestamp rows are immutable (`ON CONFLICT DO NOTHING`). Raw file SHA256 is stored; operator must retain raw bytes separately. Failed batch audit persistence and correction/version workflows remain to implement. Database ingestion has not been integration-tested here.
-
-`app.terrain.sample_elevation` samples an approved local raster with CRS transform and nodata checks. It is not connected to public assessment; raster height may be DSM rather than ground DTM and must not automatically be labeled house elevation.
+Operator import and hydraulic package contracts: see OPERATIONS.md. API exposes no unauthenticated write/approval endpoint. Raw-file ingestion performs a transaction and keeps existing station/timestamp records immutable; correction revisions require separate work.

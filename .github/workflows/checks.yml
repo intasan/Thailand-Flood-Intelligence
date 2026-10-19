@@ -1,8 +1,21 @@
 name: checks
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgis:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: flood_test
+          POSTGRES_USER: flood
+          POSTGRES_PASSWORD: test_only_password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U flood -d flood_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -10,6 +23,9 @@ jobs:
           python-version: '3.12'
       - run: pip install -r backend/requirements.txt
       - run: cd backend && python -m pytest -q
+        env:
+          TEST_DATABASE_URL: postgresql://flood:test_only_password@localhost:5432/flood_test
+          PUBLIC_DATA_ENABLED: 'false'
   frontend:
     runs-on: ubuntu-latest
     steps:
@@ -20,3 +36,35 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: cd frontend && npm ci && npm test && npm run build
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start local test stack
+        run: docker compose up --build --wait --wait-timeout 180 db api web
+        env:
+          POSTGRES_PASSWORD: test_only_password
+          PUBLIC_DATA_ENABLED: 'false'
+      - name: Verify real API, database and Next proxy
+        run: |
+          curl --fail --retry 15 --retry-delay 2 --retry-all-errors http://localhost:8000/health/ready
+          curl --fail --retry 15 --retry-delay 2 --retry-all-errors http://localhost:3000/api/v1/status
+          curl --fail http://localhost:3000/api/openapi.json
+      - name: Show logs
+        if: failure()
+        run: docker compose logs --tail=100
+        env:
+          POSTGRES_PASSWORD: test_only_password
+      - name: Stop local test stack
+        if: always()
+        run: docker compose down -v
+        env:
+          POSTGRES_PASSWORD: test_only_password
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f pipelines/Dockerfile -t flood-airflow-test .
+      - name: Validate DAG imports
+        run: |
+          docker run --rm -v "$PWD/pipelines/dags:/opt/airflow/dags:ro" --entrypoint python flood-airflow-test -c "from airflow.models import DagBag; b=DagBag('/opt/airflow/dags',include_examples=False); assert not b.import_errors, b.import_errors; assert 'approved_observations' in b.dags"

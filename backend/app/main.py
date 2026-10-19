@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from shapely.geometry import shape
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.1.0")
+app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.2.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 class PointRequest(BaseModel):
@@ -41,7 +41,12 @@ def ready():
 
 @app.get("/v1/status")
 def status():
-    return {"validated_model_count": 0, "observation_count": 0, "coverage": [], "forecast_enabled": False}
+    from .repository import data_status
+    try: result=data_status()
+    except Exception: result={"database":"unavailable","observation_count":None,"station_count":None,"latest_observed_at":None}
+    from .models import catalog
+    models,rejected=catalog()
+    return {**result,"validated_model_count":len(models),"rejected_model_count":rejected,"model_periods":[{"model_version":m["model_version"],"valid_from":m["valid_from"],"valid_to":m["valid_to"]} for _,m in models],"forecast_enabled":False}
 
 @app.post("/v1/assess")
 def assess(p: PointRequest): return assessment(p.lat, p.lon)
@@ -56,11 +61,34 @@ def parcel(p: ParcelRequest):
         if g.has_z: raise ValueError()
     except Exception: raise HTTPException(422, "Valid 2D WGS84 Polygon required; maximum 1000 vertices")
     result=assessment(g.centroid.y,g.centroid.x)
+    from pyproj import Geod
+    area,perimeter=Geod(ellps="WGS84").geometry_area_perimeter(g)
+    result["area_m2"]=abs(area)
+    result["perimeter_m"]=perimeter
     result["geometry"]=p.geometry
     result["aggregation"]="unavailable; centroid is a display location, not parcel-wide analysis"
     return result
 
 @app.get("/v1/geocode")
 def geocode(q: str = Query(min_length=2, max_length=160)):
-    # A contracted/self-hosted geocoder is intentionally required. No public-service autocomplete.
-    raise HTTPException(503, "Place-name provider is not configured. Use coordinates, GPS or map click.")
+    from .providers import geocode as search, ProviderUnavailable
+    try: return search(q)
+    except (ProviderUnavailable, OSError, __import__("sqlite3").Error) as e: raise HTTPException(503, str(e))
+
+@app.get("/v1/elevation")
+def elevation(lat: float = Query(ge=-90,le=90,allow_inf_nan=False), lon: float = Query(ge=-180,le=180,allow_inf_nan=False)):
+    from .providers import elevation as sample, ProviderUnavailable
+    try: return sample(lat,lon)
+    except (ProviderUnavailable, OSError, __import__("sqlite3").Error) as e: raise HTTPException(503,str(e))
+
+@app.get("/v1/stations")
+def stations(lat: float = Query(ge=-90,le=90,allow_inf_nan=False), lon: float = Query(ge=-180,le=180,allow_inf_nan=False), radius_km: float = Query(default=20,gt=0,le=100)):
+    from .repository import nearby_stations
+    try: return nearby_stations(lat,lon,radius_km)
+    except Exception: raise HTTPException(503,"Station database unavailable")
+
+@app.get("/v1/models/point")
+def model_point(lat: float = Query(ge=-90,le=90,allow_inf_nan=False), lon: float = Query(ge=-180,le=180,allow_inf_nan=False), at: str | None = None):
+    from .models import model_point as sample, ModelRejected
+    try: return sample(lat,lon,at)
+    except (ModelRejected,ValueError):raise HTTPException(422,"Invalid timestamp or model package")

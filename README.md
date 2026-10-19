@@ -1,39 +1,45 @@
-# Thailand Flood Intelligence
-ระบบเริ่มต้นสำหรับค้นหาพิกัดและตรวจสอบความพร้อมข้อมูลน้ำ แยก Public Dashboard และ Research API ไม่มีข้อมูลน้ำหรือผลพยากรณ์จำลองแสดงเป็นของจริง
+# Thailand Flood Intelligence — v0.2
 
-## Run locally
-Requires Docker Engine + Compose v2. Copy `.env.example` to `.env`, set a local `POSTGRES_PASSWORD` (URL-safe characters), then:
+แพลตฟอร์มวิจัยสถานการณ์น้ำ แยก Public Dashboard และ Research API ใช้ข้อมูลที่มีแหล่งอ้างอิง และไม่สร้างค่าตรวจวัด/ผลพยากรณ์ปลอม
+
+## Quick start
+ติดตั้ง Docker Desktop/Engine และ Compose v2 คัดลอก `.env.example` เป็น `.env` ตั้ง POSTGRES_PASSWORD ที่ปลอดภัยและใช้ตัวอักษรที่ไม่ต้อง URL encode แล้วรัน:
 ```bash
 docker compose up --build -d
 ```
-Dashboard http://localhost:3000 · API http://localhost:8000/docs
-```bash
-docker compose --profile pipeline up -d airflow
-```
-Airflow http://localhost:8080; development standalone only. Find generated development credentials in container logs; never expose this service publicly. The audit DAG intentionally fails until an approved manifest is supplied. There is no automatic live ingestion yet.
+Dashboard: http://localhost:3000 · Research docs: http://localhost:3000/research · FastAPI: http://localhost:8000/docs
 
-## Development / tests
+## มีอะไรใช้งานได้
+- Next.js / TypeScript / Tailwind / MapLibre แผนที่ OSM; GPS, พิกัด, Google Maps URL แบบมีพิกัด, วาด/ย้อนจุด/ส่งออกแปลง GeoJSON
+- ค้นหาชุมชน/เมืองในไทยผ่าน GeoNames / Open-Meteo พร้อมรายการให้เลือก ไม่รับประกันที่อยู่รายบ้าน
+- อ่านความสูงพื้นผิว Copernicus GLO-90 ผ่าน Open-Meteo พร้อมแหล่งที่มา เวลา ความละเอียด 90 ม. และ datum EGM2008 ไม่อ้างว่าเป็นค่ารังวัดพื้นดินรายบ้าน
+- Research API อ่านสถานีและค่าล่าสุดจาก PostGIS พร้อมข้อมูลเก่า/ใหม่และ datum; ไม่มีข้อมูลสถานีตัวอย่างปะปนฐานจริง
+- นำเข้า CSV ที่ผู้ดูแลอนุมัติแบบ atomic/idempotent; Airflow รับไฟล์จริงจาก local inbox
+- ประตูตรวจรับแพ็กเกจผลแบบจำลองที่ผู้เชี่ยวชาญอนุมัติ ตรวจ checksum, validation, ช่วงเวลา, raster coverage/NoData ก่อนให้ Research API อ่าน
+- Swagger/OpenAPI, Docker Compose, automated tests และ GitHub Actions พร้อม PostGIS integration และ Compose smoke tests
+
+## ยังต้องมีเพื่อวิเคราะห์น้ำท่วมจริง
+ยังไม่มีชุดข้อมูลสถานีน้ำที่รับรองและแบบจำลองพื้นที่นำร่อง ไม่มีการจำลอง 1D/2D หรือการรับรองทางอุทกวิทยาใน repository จึงยังไม่มีผลความลึก ระยะเวลาท่วม หรือความเสี่ยงจริงใน Dashboard การตรวจ metadata แพ็กเกจไม่ใช่การรับรองความถูกต้องทางฟิสิกส์ ค่าความสูงพื้นผิว 90 ม. ไม่เพียงพอใช้ลบระดับน้ำเพื่อสรุปน้ำท่วม
+
+แผนที่ฐานเป็น OSM สำหรับการใช้งาน interactive ปริมาณต่ำเท่านั้น ต้องเปลี่ยนเป็นผู้ให้บริการที่มีสิทธิ์ก่อนขยายการใช้; ไม่มี bulk/offline tile download. Open-Meteo free endpoints ใช้สำหรับงานวิจัย/การศึกษาที่ไม่ใช่เชิงพาณิชย์เท่านั้น มี cache และโควตา ปิดได้ด้วย PUBLIC_DATA_ENABLED=false
+
+## Development and checks
 ```bash
 python -m pip install -r backend/requirements.txt
 cd backend
 python -m pytest -q
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 ```
-In a second terminal:
+อีก terminal:
 ```bash
 cd frontend
 npm ci
+npm test
+npm run build
 npm run dev
 ```
-Checks: `npm test`, `npm run typecheck`, `npm run build`. Next proxies /api to localhost:8000 in development; Docker uses api:8000. Basemap uses online OSM raster tiles with attribution. Configure a licensed provider before substantial use. Do not offline-prefetch OSM tiles.
+PostGIS integration tests require TEST_DATABASE_URL pointing to a disposable test database. Tests create and remove isolated schemas. GitHub Actions supplies a real PostGIS service. Do not point tests at operational databases.
 
-## Implemented scope
-- Thai responsive Next.js/TypeScript/Tailwind dashboard, MapLibre basemap, map selection, browser GPS, coordinate/long Google Maps URL parsing.
-- Click-to-draw polygon, clear/cancel, API geometry validation and metadata view.
-- FastAPI schemas/OpenAPI, explicit unknown outcomes, PostGIS migration, observation provenance validator, approved local-file CSV importer, local raster sampling utility and river DAG topology validator.
-- Docker definitions and offline Airflow source-readiness audit, automated backend tests and CI definition.
+เอกสาร: [Operations](docs/OPERATIONS.md), [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), [Data audit](docs/DATA_AUDIT.md), [Verification](docs/VERIFICATION.md)
 
-## Not operational yet
-Place-name search, short Google link expansion, verified Thai boundary containment, public DEM sampling, live observation integration, hydraulic routing/simulation, flood depth/duration/risk outputs, parcel statistics and production operations. Map and coordinate selection cover Thailand visually; coordinates outside Thailand are accepted but always unsupported. Network/structure effects are specified, not calculated. No pilot model has been calibrated or validated.
-
-Read docs/DATA_AUDIT.md, docs/ARCHITECTURE.md, docs/API.md and docs/VERIFICATION.md. This code is not an operational flood warning service. No deployment performed. Source uploaded to GitHub with user authorization.
+ยังไม่มี hosted deployment. ไม่มีข้อมูลไม่ได้หมายถึงปลอดภัยจากน้ำท่วม

@@ -17,3 +17,11 @@
 - Local checks above passed. GitHub CI results must be checked separately after upload. No hosted deployment.
 
 Tests and frontend compilation do not establish operational hydrologic validity. Public release must wait for these integration checks and the separate pilot acceptance described in ARCHITECTURE.md.
+
+## v0.2 execution record
+- Previous v0.1 GitHub Actions run 39295313479 completed successfully.
+- Local backend: 22 passed, 2 PostGIS tests skipped because local database runtime is unavailable. Those two tests are configured for real PostGIS in CI.
+- Frontend: 3 coordinate tests passed; production build and TypeScript passed, including /research and the same-origin API proxy.
+- Real source smoke: geocoding returned Thai Bangkok candidates; elevation endpoint returned a Copernicus DSM response for 13.75,100.5. This verifies connectivity only, not survey accuracy or a flood forecast.
+- New CI jobs test PostGIS import rollback/idempotency and spatial lookup, build/start Compose with public data disabled, check database readiness/Next proxy/OpenAPI, and build Airflow and import DAGs. Final CI outcome is recorded after the run completes.
+- No hydrologic pilot, independently validated operational model or hosted deployment. Browser interaction QA remains unexecuted in this environment.
