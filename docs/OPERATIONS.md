@@ -70,3 +70,7 @@ See [RIVER_NETWORK.md](RIVER_NETWORK.md) for the offline input contract, origina
 
 ## Historical rainfall preparation
 See [RAINFALL_INPUT.md](RAINFALL_INPUT.md) for local catchment-mean interval preparation. Requires source-linked non-overlapping catchments, explicit approved quality flags and checksums. Incomplete coverage remains null for complete-window totals. This command writes a prepared report only; no PostGIS ingestion, feed, rainfall-to-runoff conversion or model approval is performed.
+
+
+## Local DEM integrity
+See [DEM_AUDIT.md](DEM_AUDIT.md). The read-only CLI checks one self-contained local GeoTIFF and its manifest, scans valid/masked/non-finite pixels and reports resolution in native units. Structural success does not approve model terrain, establish pilot coverage or reconcile vertical datums.
