@@ -137,3 +137,14 @@ All four jobs passed:
 - Pipeline: Airflow image and DAG import checks passed.
 
 This integrates prior source-input audits and approximate catchment-specific DEM coverage. No real pilot bundle is configured. Reports keep input blockers separate from scientific blockers and always return hydraulic_ready=false. Approximate densified boundaries/all-touched pixels do not establish surveyed coverage, datum alignment or real hydraulic connectivity. No solver, calibrated rainfall/runoff model, independent hydraulic event validation, public property-risk output or deployment was added. Browser/WebGL/GPS QA remains outstanding.
+
+## Exact-time station water-level comparison v1.0.0
+Tested code commit: `9504cd64d97c9ff4fb3084fb72d2e8f06ac6d686`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39314589363
+All four jobs passed:
+- Backend: 206 passed with real PostGIS (local: 202 passed / 4 database skips). Thirty-one new synthetic comparison cases cover known MAE/RMSE/bias and sign, zero/negative levels, missing/quarantined samples, null metrics with fewer than two pairs, partial-window metric scope, UTC-equivalent matching/duplicate rejection, empty series, malformed source/datum/unit/hash/time-grid fields, declared calibration-event reuse, multiple stations/pooling, overflow, capacity and CLI hash/rejection behavior.
+- Frontend: existing 20 tests and production build passed; frontend source unchanged.
+- Compose: full db/API/web smoke tests and actual HII historical import/query passed (4,304 accepted / 16 quarantined).
+- Pipeline: Airflow image and DAG import checks passed.
+
+This tool compares supplied local observed and simulated station elevations only. No real model simulation or held-out hydraulic event was validated. Datum/evidence and event independence remain declared assertions requiring independent review. No automatic acceptance threshold, scientific certification, model approval or signed schema-v2 evidence was issued. Station errors do not establish property flood depth, extent or duration. No deployment was performed; operational hydraulic pilot and browser/WebGL/GPS QA remain outstanding.
