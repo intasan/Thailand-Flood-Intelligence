@@ -93,3 +93,14 @@ All four jobs passed:
 - Pipeline: Airflow image and DAG import checks passed.
 
 The CLI is an offline preprocessing tool only; it performs structural validation and incremental-area accumulation, not discharge routing or inundation. No real Thai network has been registered or independently verified. Provenance-field presence and a matching source checksum do not authenticate source rights or flow direction. Catchment overlap cannot be checked without polygons. One-downstream acyclic representation excludes bifurcations and reversing/tidal flow. The audit does not approve any hydraulic model, infer property accessibility or enable public risk results. No deployment was performed. Browser/WebGL/GPS QA and an operational independently validated hydraulic pilot remain outstanding.
+
+## Incremental catchment geometry — network audit v1.1.0
+Tested code commit: `29472ac83103ca8a291d2da166b5e7c7803c4384`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39304797846
+All four jobs passed:
+- Backend: 91 tests passed with real PostGIS (local: 87 passed, 4 database skips). Nineteen new synthetic-fixture cases cover shared boundaries, actual overlap across outlets, identical polygons, holes/orientation/MultiPolygon, islands in holes, invalid/partial geometry/provenance, unclosed/3D/antimeridian shapes, reach coverage, scalar/geometry area agreement, geometry-based downstream accumulation, bounded spatial candidates and CLI source integrity.
+- Frontend: 20 existing tests and production build passed; frontend source unchanged in this increment.
+- Compose: db/API/web smoke tests and real HII archive import/query passed; 4,304 rows accepted, 16 quarantined.
+- Pipeline: Airflow image and DAG import checks passed.
+
+Catchment tests use synthetic fixtures only; no real Thai catchment or network has been accepted. When complete optional geometries are supplied, overlap and reach coverage are checked and WGS84 ellipsoidal areas are accumulated. Scalar-only operation remains explicitly unverified. Non-overlap does not establish correct drainage divides, gap-free basin coverage or property accessibility. No discharge routing, calibrated hydraulic model, flood-risk forecast or deployment was added. Browser/WebGL/GPS QA remains unexecuted.
