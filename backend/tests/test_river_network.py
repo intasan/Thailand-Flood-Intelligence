@@ -28,6 +28,8 @@ def test_confluence_and_unknown_area():
     assert report['reaches'][-1]['upstream_ids'] == ['a', 'b']
     assert all(r['length_m'] > 0 for r in report['reaches'])
     assert report['hydraulic_validation'] == 'not_performed'
+    assert report['catchment_geometry_check'] == 'not_supplied'
+    assert report['area_method'] == 'supplied_incremental_areas_unverified'
     assert 'flood_depth_m' not in report
     p['reaches'][0]['incremental_catchment_area_m2'] = None
     assert audit_network(p)['reaches'][-1]['contributing_area_m2'] is None

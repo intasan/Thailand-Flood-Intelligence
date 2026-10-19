@@ -104,24 +104,29 @@ def audit_network(package, tolerance_m=30):
                 queue.append(target)
     if len(order) != len(reaches):
         raise ValueError('Directed cycle detected; tidal/reversing networks require another representation')
+    from .catchments import catchment_areas
+    geometry_areas = catchment_areas(reaches, provenance)
     areas = {}
     for rid in order:
-        local = reaches[rid].get('incremental_catchment_area_m2')
+        local = geometry_areas[rid] if geometry_areas is not None else reaches[rid].get('incremental_catchment_area_m2')
         parents = upstream[rid]
         try:
             areas[rid] = None if local is None or any(areas[p] is None for p in parents) else math.fsum([local, *(areas[p] for p in parents)])
         except OverflowError:
             raise ValueError('Accumulated area overflow') from None
     return {'status': 'structural_checks_passed', 'hydraulic_validation': 'not_performed',
-        'generated_at': datetime.now(timezone.utc).isoformat(), 'audit_version': '1.0.0',
+        'generated_at': datetime.now(timezone.utc).isoformat(), 'audit_version': '1.1.0',
         'provenance': dict(provenance), 'raw_source_checksum': 'not_checked', 'endpoint_tolerance_m': tolerance_m,
+        'catchment_geometry_check': 'non_overlapping_reach_coverage_checked' if geometry_areas is not None else 'not_supplied',
+        'area_method': 'WGS84_ellipsoidal_from_geometry' if geometry_areas is not None else 'supplied_incremental_areas_unverified',
         'reach_count': len(reaches), 'topological_order': order,
         'outlets': sorted(rid for rid, r in reaches.items() if r.get('downstream_id') is None),
         'reaches': [{'id': rid, 'downstream_id': reaches[rid].get('downstream_id'),
                     'upstream_ids': sorted(upstream[rid]), 'length_m': lengths[rid],
+                    'incremental_catchment_area_m2': geometry_areas[rid] if geometry_areas is not None else reaches[rid].get('incremental_catchment_area_m2'),
                     'contributing_area_m2': areas[rid]} for rid in order],
         'limitations': ['Source rights, direction evidence and catchment disjointness require human verification.',
-                        'Areas assume non-overlapping incremental catchments; missing area propagates as null.',
+                        'Geometry checks do not establish real drainage divides or completeness; without geometry, areas assume disjoint catchments and missing area propagates as null.',
                         'One downstream reach only; bifurcation, tide/backwater and flow reversal are unsupported.',
                         'No discharge routing, water levels, barriers, land accessibility or inundation is computed.']}
 
