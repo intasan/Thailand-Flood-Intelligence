@@ -148,3 +148,14 @@ All four jobs passed:
 - Pipeline: Airflow image and DAG import checks passed.
 
 This tool compares supplied local observed and simulated station elevations only. No real model simulation or held-out hydraulic event was validated. Datum/evidence and event independence remain declared assertions requiring independent review. No automatic acceptance threshold, scientific certification, model approval or signed schema-v2 evidence was issued. Station errors do not establish property flood depth, extent or duration. No deployment was performed; operational hydraulic pilot and browser/WebGL/GPS QA remain outstanding.
+
+## Actual HII observed-comparison input export v1.0.0
+Tested code commit: `e2d04bf5792919ed341b1ace5d56961b1ce2a62f`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39315418760
+All four jobs passed:
+- Backend: 223 tests passed with real PostGIS (local: 218 passed / 5 database skips). Sixteen new unit cases cover exact zero/negative values, source/checksum/time provenance, gaps, rejected flags as blanks, metadata identity protection, invalid inputs and non-overwrite behavior. One new PostGIS integration test checks read-only snapshot export, unchanged observation counts and rejection after source withdrawal.
+- Frontend: existing 20 tests and production build passed; no frontend source changes.
+- Compose: actual HII CPY001 September 2026 archive import accepted 4,304 rows and quarantined 16. A new export of 30 September Asia/Bangkok (2026-09-29T17:00:00Z to 2026-09-30T17:00:00Z exclusive) produced 144 actual observation rows, all N quality, with no absent 10-minute intervals. CSV SHA256: `046a5ac9ffe1eff847ae44804db3be1c3b148523918c6ea137cca98792bb3a54`. Licence evidence and original assumed Asia/Bangkok timezone status were checked. The exact-time level-comparison loader successfully read all 144 rows. No simulated series was generated.
+- Pipeline: Airflow image and DAG import checks passed.
+
+Export preserves HII historical source constraints and published MSL datum; it does not resolve timezone uncertainty or transform to EGM2008/model datum. Snapshot export time is explicitly distinguished from original source download time. The observation descriptor identifies original raw-file hashes rather than inventing an agency release. CI output files were temporary container test outputs, not a published data release. There is still no real calibrated model simulation/held-out hydraulic validation, operational flood-risk forecast or deployment. Browser/WebGL/GPS QA remains outstanding.
