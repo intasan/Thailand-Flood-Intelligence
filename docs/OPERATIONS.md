@@ -66,3 +66,7 @@ Station history uses actual returned observations. Chart lines break at invalid 
 
 ## River-network preflight
 See [RIVER_NETWORK.md](RIVER_NETWORK.md) for the offline input contract, original-source checksum verification and upstream/downstream structural audit. No network is approved, persisted or served automatically. This is a preprocessing check, not a flow or inundation model.
+
+
+## Historical rainfall preparation
+See [RAINFALL_INPUT.md](RAINFALL_INPUT.md) for local catchment-mean interval preparation. Requires source-linked non-overlapping catchments, explicit approved quality flags and checksums. Incomplete coverage remains null for complete-window totals. This command writes a prepared report only; no PostGIS ingestion, feed, rainfall-to-runoff conversion or model approval is performed.

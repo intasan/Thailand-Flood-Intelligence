@@ -20,6 +20,7 @@ Dashboard: http://localhost:3000 · Research docs: http://localhost:3000/researc
 - คำนวณพื้นที่แปลงที่มีรูได้ถูกทิศ แสดงไร่–งาน–ตารางวา และใช้จุดแสดงผลภายในแปลงเว้า
 - ตรวจข้อมูลผู้ให้บริการก่อน cache และจำกัดขนาดคำขอก่อนประมวลผล GIS
 - ตัวตรวจโครงข่ายแม่น้ำแบบ offline: ทิศทาง/จุดเชื่อม/วงจร และพื้นที่รับน้ำสะสม ตรวจ Polygon ซ้อนทับเมื่อมีขอบเขตครบ พร้อม checksum ต้นฉบับ (ยังไม่คำนวณการไหลหรือน้ำท่วม; ดู [RIVER_NETWORK.md](docs/RIVER_NETWORK.md))
+- ตัวเตรียมข้อมูลฝนเฉลี่ยพื้นที่รับน้ำแบบ offline: ตรวจช่วงเวลา/หน่วย/checksum กักกันค่าที่ไม่ผ่าน และไม่เติมฝนศูนย์แทนข้อมูลขาด (ดู [RAINFALL_INPUT.md](docs/RAINFALL_INPUT.md))
 - หน้า /readiness แสดงข้อมูลที่มีจริงและส่วนที่ยังไม่รองรับ
 - ประตูตรวจรับแพ็กเกจผลแบบจำลองแบบมีลายเซ็นผู้ตรวจที่เชื่อถือและไฟล์หลักฐานจริงที่ผู้เชี่ยวชาญอนุมัติ ตรวจ checksum, validation, ช่วงเวลา, raster coverage/NoData ก่อนให้ Research API อ่าน
 - Swagger/OpenAPI, Docker Compose, automated tests และ GitHub Actions พร้อม PostGIS integration และ Compose smoke tests
