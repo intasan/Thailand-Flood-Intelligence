@@ -78,3 +78,7 @@ See [DEM_AUDIT.md](DEM_AUDIT.md). The read-only CLI checks one self-contained lo
 
 ## Integrated pilot bundle
 See [PILOT_PREFLIGHT.md](PILOT_PREFLIGHT.md) to recheck consistent original inputs and DEM coverage per catchment in one local command. Input gaps and scientific blockers remain separate; hydraulic readiness is always false at this preparation stage. No local report changes the public readiness API or approves operational coverage.
+
+
+## Station-level model comparison
+See [LEVEL_VALIDATION.md](LEVEL_VALIDATION.md) for exact-time local observed-versus-simulated elevation comparisons, source hashes, datum requirements and missingness-aware metric scope. No threshold, reviewer approval or signed schema-v2 evidence is generated automatically.
