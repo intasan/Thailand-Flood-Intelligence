@@ -1,4 +1,4 @@
-# Research API v0.2
+# Research API v0.6
 Swagger http://localhost:8000/docs · same-origin docs http://localhost:3000/research · schema /api/openapi.json
 
 | Endpoint | Contract |
@@ -35,3 +35,9 @@ Public station/observation counts are restricted to approved sources with licenc
 POST request bodies are bounded to 64,000 bytes before API JSON/GIS processing, including chunked bodies without Content-Length. The Next proxy enforces the same byte limit, a total body-read deadline and JSON media type; it forwards documented read/assessment routes only. Oversize=413, invalid media type at proxy=415, invalid UTF-8 at proxy=400, timed-out body=408. Proxy responses explicitly use Cache-Control: no-store; provider's separate server cache retains its documented TTL.
 
 Provider payloads are validated before caching. Malformed previously cached entries are evicted and fetched again. Invalid coordinates/admin objects or elevation shapes never become cached data or fallback measurements. Empty/whitespace-only place searches are rejected before upstream access.
+
+
+## v0.6 dashboard clients
+The dashboard imports a single WGS84 Polygon GeoJSON (including holes) using the existing `/v1/parcels/assess` contract; no import-storage endpoint is added. Client file limit: 60,000 bytes / 1,000 total positions, with final topology validation by the API.
+
+History charts and CSV exports consume `/v1/observations` without interpolation. CSV retains observation timestamps, datum, source URL, raw checksum and source quality/time-assumption metadata when provided. Display times are explicitly Asia/Bangkok. Coordinate share links use `#lat=<latitude>&lon=<longitude>` and contain no parcel or model result.

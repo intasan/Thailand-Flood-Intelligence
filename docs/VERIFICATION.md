@@ -69,3 +69,16 @@ Local backend: 49 passes, 4 database skips; CI ran all 53 with no skips. A local
 Parcel areas remain approximate ellipsoidal calculations from submitted boundaries, not certified land surveys. Display points are for location display only; no parcel flood inference is derived. Invalid provider payloads are never cached as usable data. Body limits apply before JSON/GIS processing. Public counts exclude withdrawn/unlicensed sources.
 
 WebGL initialization failure is handled in code to preserve location inputs, but browser interaction/WebGL/GPS visual testing remains unexecuted. There is still no live gauge feed, calibrated operational hydraulic pilot, property-risk forecast or hosted deployment. Software checks above do not establish hydrologic validity.
+
+## v0.6 — parcel import, coordinate sharing and archive charts
+Tested code commit: `b3a3ab308296b6f3f56695035f3168a421685a11`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39302851851
+All four jobs completed successfully:
+- Backend: all 53 tests passed with real PostGIS. Local run: 49 passed, 4 database-dependent skips.
+- Frontend: 20 tests passed; TypeScript and production build passed. New coverage includes preservation of all polygon hole rings, rejection of projected/3D/multi-feature/unclosed/oversized files, coordinate share-link parsing, missing/invalid-observation line breaks, zero/negative water levels, chronological-domain validation and CSV provenance/formula escaping.
+- Compose: database/migration/API/web health, proxy and assessment checks passed; actual CPY001 September 2026 archive import accepted 4,304 rows and quarantined 16 of 4,320; subsequent observation queries passed.
+- Pipeline: Airflow image build and DAG imports passed.
+
+Imported GeoJSON is not considered valid until the API accepts its topology. Coordinate links disclose the selected point to recipients; no parcel boundary or risk result is embedded. Station charts show actual returned history in Thai time, never filled values or inferred property flood depth. CSV preserves supplied source and timestamp-assumption metadata.
+
+Browser interaction, WebGL/GPS and visual QA remain unexecuted. No deployment was performed. There is still no live gauge feed, surveyed/calibrated operational hydraulic pilot or property flood-risk forecast. Passing software checks does not establish hydrologic validity.
