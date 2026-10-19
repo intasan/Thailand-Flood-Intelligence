@@ -74,3 +74,7 @@ See [RAINFALL_INPUT.md](RAINFALL_INPUT.md) for local catchment-mean interval pre
 
 ## Local DEM integrity
 See [DEM_AUDIT.md](DEM_AUDIT.md). The read-only CLI checks one self-contained local GeoTIFF and its manifest, scans valid/masked/non-finite pixels and reports resolution in native units. Structural success does not approve model terrain, establish pilot coverage or reconcile vertical datums.
+
+
+## Integrated pilot bundle
+See [PILOT_PREFLIGHT.md](PILOT_PREFLIGHT.md) to recheck consistent original inputs and DEM coverage per catchment in one local command. Input gaps and scientific blockers remain separate; hydraulic readiness is always false at this preparation stage. No local report changes the public readiness API or approves operational coverage.
