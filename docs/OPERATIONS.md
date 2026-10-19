@@ -86,3 +86,7 @@ See [LEVEL_VALIDATION.md](LEVEL_VALIDATION.md) for exact-time local observed-ver
 
 ## Export measured HII comparison inputs
 See [OBSERVATION_EXPORT.md](OBSERVATION_EXPORT.md). The operator CLI uses a read-only database snapshot, requires a new output directory and preserves original source/quality/time assumptions. It produces only the observation side of a comparison, not invented simulations or datum-alignment evidence. Source licence restrictions remain unchanged.
+
+
+## Manual Airflow research export
+See [AIRFLOW_EXPORT.md](AIRFLOW_EXPORT.md). The unscheduled DAG requires explicit window/request ID/non-commercial acknowledgement, writes below the fixed research export root and returns only a small receipt. Repeating work needs a new request ID; automatic retries are disabled. Preserve needed export files before deleting Airflow volumes.

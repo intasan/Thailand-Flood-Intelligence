@@ -7,7 +7,6 @@ import io
 import json
 import math
 from pathlib import Path
-from .river_network import audit_network
 
 MAX_INTERVALS = 100000
 
@@ -50,6 +49,7 @@ def prepare_rainfall(raw, manifest, network, network_sha256):
         raise ValueError('Rainfall CSV checksum mismatch')
     if manifest['network_package_sha256'] != network_sha256:
         raise ValueError('Network package checksum mismatch')
+    from .river_network import audit_network
     report = audit_network(network)
     if report['catchment_geometry_check'] != 'non_overlapping_reach_coverage_checked':
         raise ValueError('Complete non-overlapping catchment geometries required')

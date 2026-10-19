@@ -67,6 +67,15 @@ jobs:
         env:
           POSTGRES_PASSWORD: test_only_password
           PUBLIC_DATA_ENABLED: 'false'
+      - name: Execute manual Airflow export DAG against actual HII data
+        run: |
+          docker compose --profile pipeline build airflow
+          docker compose --profile pipeline run --rm --no-deps airflow airflow db migrate
+          docker compose --profile pipeline run --rm --no-deps airflow airflow dags test hii_observation_export 2026-10-01T00:00:00+00:00 --conf '{"station":"CPY001","request_id":"ci-hii-export","start":"2026-09-29T17:00:00Z","end":"2026-09-30T17:00:00Z","interval_seconds":600,"accept_non_commercial":true}'
+          docker compose --profile pipeline run --rm --no-deps airflow python -c "import pathlib,json,hashlib; from airflow.models import DagRun; from airflow.settings import Session; p=pathlib.Path('/opt/airflow/research_exports/ci-hii-export'); raw=(p/'observations.csv').read_bytes(); d=json.loads((p/'observations-descriptor.json').read_text()); v=json.loads((p/'provenance.json').read_text()); assert hashlib.sha256(raw).hexdigest()==d['raw_sha256']; assert v['exported_rows']==144 and all(r['source_timezone']=='Asia/Bangkok' for r in v['records']); s=Session(); run=s.query(DagRun).filter(DagRun.dag_id=='hii_observation_export').first(); assert run is not None and run.state=='success'; s.close(); print('Real Airflow DAG HII export verified:',v['exported_rows'],'rows; no simulation generated')"
+        env:
+          POSTGRES_PASSWORD: test_only_password
+          PUBLIC_DATA_ENABLED: 'false'
       - name: Show logs
         if: failure()
         run: docker compose logs --tail=100
@@ -84,4 +93,4 @@ jobs:
       - run: docker build -f pipelines/Dockerfile -t flood-airflow-test .
       - name: Validate DAG imports
         run: |
-          docker run --rm -v "$PWD/pipelines/dags:/opt/airflow/dags:ro" --entrypoint python flood-airflow-test -c "from airflow.models import DagBag; b=DagBag('/opt/airflow/dags',include_examples=False); assert not b.import_errors, b.import_errors; assert 'approved_observations' in b.dags; assert 'hii_historical' in b.dags"
+          docker run --rm -v "$PWD/pipelines/dags:/opt/airflow/dags:ro" --entrypoint python flood-airflow-test -c "from airflow.models import DagBag; b=DagBag('/opt/airflow/dags',include_examples=False); assert not b.import_errors, b.import_errors; assert 'approved_observations' in b.dags; assert 'hii_historical' in b.dags; assert 'hii_observation_export' in b.dags; d=b.dags['hii_observation_export']; assert d.schedule_interval is None and d.max_active_runs==1; assert d.get_task('export_snapshot').retries==0; assert d.params['accept_non_commercial'] is False"

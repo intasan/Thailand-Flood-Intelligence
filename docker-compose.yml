@@ -66,6 +66,7 @@ services:
     command: standalone
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAG_RUN_CONF_OVERRIDES_PARAMS: "true"
       DATABASE_URL: postgresql://flood:${POSTGRES_PASSWORD}@db:5432/flood
     ports: ["127.0.0.1:8080:8080"]
     volumes:
