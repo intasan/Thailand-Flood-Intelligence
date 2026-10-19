@@ -1,30 +1,28 @@
-# Verification record — 2026-10-19 UTC
+# Verification record — v0.2 — 2026-10-19 UTC
 
-## Executed
-- Backend pytest with requirements.txt versions installed: 13 passed. Synthetic inputs exist only inside unit tests, never in dashboard/API data.
-- Tests cover null/unknown public outcomes, invalid coordinates, polygon/self-intersection validation, disabled geocoder, source manifest approval, timestamp/unit/provenance gate, raw checksums, river network cycle rejection, raster CRS/bounds/NoData and liveness versus readiness.
-- Next.js 16.4.2 production build including TypeScript validation: passed. MapLibre 6.15.0 uses named module imports.
-- Frontend Node tests: 3 passed (coordinate validation, Google pin/viewport precedence, malformed and untrusted URL rejection).
-- `npm audit --omit=dev --audit-level=high`: found 0 vulnerabilities at execution time (not a guarantee about future advisories or Docker/Python dependencies).
-- Compose YAML parsed with PyYAML; this does not validate Docker runtime.
+## Verified source and CI
+Code commit: `3ff7bde6d4fc0173988e8e7484ee06740e4cf018`.
+GitHub Actions run: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39296900798
+All four jobs completed successfully:
 
-## Not executed / not validated
-- Docker image builds, Compose startup and PostGIS SQL execution: Docker/Postgres binaries unavailable.
-- Database importer transaction behavior and constraint integration: needs running PostGIS.
-- Airflow execution: runtime not installed; DAG is an offline readiness audit, not live ingestion.
-- Browser interaction, GPU map rendering, mobile viewport, geolocation permissions and external tile delivery: browser QA capability unavailable in managed environment.
-- No operational datasets acquired. No hydraulic solver installed/run. No calibration, independent event validation, flood prediction or accuracy claims.
-- Local checks above passed. GitHub CI results must be checked separately after upload. No hosted deployment.
+| Job | Actual checks |
+|---|---|
+| backend | 27 tests passed on a real PostGIS service. Includes approved import idempotency, atomic rollback on unknown stations, spatial lookup, stale observations, invalid geometry/coordinates, explicit unknown outcomes, provider failures/caching/quotas, raster NoData and reviewed-model time/asset/metric gates. |
+| frontend | Node coordinate tests and Next production build including TypeScript; /research and same-origin API proxy compiled. |
+| compose | Built API/web images, initialized PostGIS schema, started db/api/web containers and successfully called /health/ready, /api/v1/status and /api/openapi.json through the Next proxy. Public upstream data disabled for deterministic smoke tests. |
+| pipeline | Built the custom Airflow image and imported DAGs without errors, including approved_observations. |
 
-Tests and frontend compilation do not establish operational hydrologic validity. Public release must wait for these integration checks and the separate pilot acceptance described in ARCHITECTURE.md.
+The initial Compose test caught Rasterio's missing libexpat.so.1 in python:3.12-slim. Dockerfile now installs libexpat1/libstdc++6 and checks GIS imports during build. The successful run above includes this correction.
 
-## v0.2 execution record
-- Previous v0.1 GitHub Actions run 39295313479 completed successfully.
-- Local backend: 22 passed, 2 PostGIS tests skipped because local database runtime is unavailable. Those two tests are configured for real PostGIS in CI.
-- Frontend: 3 coordinate tests passed; production build and TypeScript passed, including /research and the same-origin API proxy.
-- Real source smoke: geocoding returned Thai Bangkok candidates; elevation endpoint returned a Copernicus DSM response for 13.75,100.5. This verifies connectivity only, not survey accuracy or a flood forecast.
-- New CI jobs test PostGIS import rollback/idempotency and spatial lookup, build/start Compose with public data disabled, check database readiness/Next proxy/OpenAPI, and build Airflow and import DAGs. Final CI outcome is recorded after the run completes.
-- No hydrologic pilot, independently validated operational model or hosted deployment. Browser interaction QA remains unexecuted in this environment.
+## Real source connectivity
+Live calls returned Bangkok location candidates and a Thai-language result for กำแพงแสน. The elevation adapter retrieved a Copernicus GLO-90 surface response for 13.75,100.5. FastAPI endpoints returned HTTP 200 through TestClient against those real/cached source adapters. Source release, fetch time, cache status, datum, attribution and limitations remain distinct. These are connectivity checks, not survey-accuracy or flood-forecast validation.
 
-- First v0.2 CI: backend/PostGIS, frontend and Airflow succeeded. Compose found Rasterio missing libexpat.so.1 in python:3.12-slim. Dockerfile now installs libexpat1/libstdc++6 and verifies GIS imports during build; full rerun pending.
-- Additional local regression cases passed: null counts when database unavailable, geodesic parcel area, and unsupported model coverage. Local total: 25 passed, 2 PostGIS skips.
+## Important verification limits
+- No browser interaction, WebGL map rendering, GPS permission flow or mobile visual QA was executed in this environment. Compilation and HTTP smoke tests do not prove those UI behaviors.
+- Airflow image and DAG import passed, but a full scheduled execution with operational station files has not occurred: no approved real station input was supplied. Local-file ingestion itself passed real PostGIS integration tests.
+- Model fixtures are synthetic unit-test-only files, never seeded into app data or served as operational results. No real hydraulic solver, calibrated pilot, independent flood-event validation or scientifically certified package exists here.
+- Model-package metadata checks enforce software preconditions; operator assertions and checksums alone cannot certify physical validity.
+- No real water-level source is connected, no depth/duration/risk forecast is shown on the Public Dashboard, and no hosted deployment was performed.
+- Public APIs and map tiles have usage/licence limits. A successful response is not unlimited production entitlement; see DATA_AUDIT.md and OPERATIONS.md.
+
+Local backend execution: 25 passed and 2 PostGIS tests skipped because no local database runtime exists. The remote backend CI supplied real PostGIS and passed all 27, with no skips. CI warnings are dependency deprecations, not test failures.
