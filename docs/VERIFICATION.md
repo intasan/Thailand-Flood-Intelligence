@@ -104,3 +104,14 @@ All four jobs passed:
 - Pipeline: Airflow image and DAG import checks passed.
 
 Catchment tests use synthetic fixtures only; no real Thai catchment or network has been accepted. When complete optional geometries are supplied, overlap and reach coverage are checked and WGS84 ellipsoidal areas are accumulated. Scalar-only operation remains explicitly unverified. Non-overlap does not establish correct drainage divides, gap-free basin coverage or property accessibility. No discharge routing, calibrated hydraulic model, flood-risk forecast or deployment was added. Browser/WebGL/GPS QA remains unexecuted.
+
+## Historical catchment-mean rainfall preparation v1.0.0
+Tested code commit: `f82b00ea04490561ceb1f2d4d1752c334caedca8`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39306034971
+All four jobs passed:
+- Backend: 129 passed with real PostGIS. Local full suite before the final two test additions: 123 passed / 4 database skips; the final targeted rainfall suite passed all 38 cases. New synthetic-fixture cases cover known-zero versus absent/quarantined rain, partial versus complete totals, interval/timezone/grid validation, equivalent-offset duplicates, metadata/rights/hash/unit/support rejection, future/forecast rejection, catchment coverage, arithmetic overflow, multiple intervals and CLI original-source/manifest integrity.
+- Frontend: existing 20 tests and production build passed; no frontend source change.
+- Compose: complete db/API/web smoke checks and actual HII historical import/query passed.
+- Pipeline: Airflow image and DAG import checks passed.
+
+The new CLI prepares local source-linked JSON only; it does not ingest a live rainfall feed or change PostGIS. All rainfall fixtures are synthetic and remain tests. No real catchment rainfall package is configured. Catchment-mean spatial processing and operator assertions require independent review. Complete precipitation volume is not runoff or discharge; missing intervals never become zero. No rainfall-to-runoff conversion, hydraulic routing, tide/barrier model, calibrated pilot, public flood-risk output or deployment was added. Browser/WebGL/GPS testing remains outstanding.
