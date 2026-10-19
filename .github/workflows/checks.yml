@@ -50,6 +50,13 @@ jobs:
           curl --fail --retry 15 --retry-delay 2 --retry-all-errors http://localhost:8000/health/ready
           curl --fail --retry 15 --retry-delay 2 --retry-all-errors http://localhost:3000/api/v1/status
           curl --fail http://localhost:3000/api/openapi.json
+      - name: Import and query one real HII historical station-month
+        run: |
+          docker compose --profile hii-import run --rm hii-import
+          curl --fail "http://localhost:3000/api/v1/observations?station_id=HII%3ACPY001" | python -c "import json,sys; d=json.load(sys.stdin); assert d['count']>0; assert d['station']['id']=='HII:CPY001'; assert d['results'][0]['metadata']['data_type']=='historical_station_observation'; print('Real HII archive read successfully; observations:',d['count'])"
+        env:
+          POSTGRES_PASSWORD: test_only_password
+          PUBLIC_DATA_ENABLED: 'false'
       - name: Show logs
         if: failure()
         run: docker compose logs --tail=100
@@ -67,4 +74,4 @@ jobs:
       - run: docker build -f pipelines/Dockerfile -t flood-airflow-test .
       - name: Validate DAG imports
         run: |
-          docker run --rm -v "$PWD/pipelines/dags:/opt/airflow/dags:ro" --entrypoint python flood-airflow-test -c "from airflow.models import DagBag; b=DagBag('/opt/airflow/dags',include_examples=False); assert not b.import_errors, b.import_errors; assert 'approved_observations' in b.dags"
+          docker run --rm -v "$PWD/pipelines/dags:/opt/airflow/dags:ro" --entrypoint python flood-airflow-test -c "from airflow.models import DagBag; b=DagBag('/opt/airflow/dags',include_examples=False); assert not b.import_errors, b.import_errors; assert 'approved_observations' in b.dags; assert 'hii_historical' in b.dags"

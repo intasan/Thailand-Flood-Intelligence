@@ -12,6 +12,19 @@ services:
       test: ["CMD-SHELL", "pg_isready -U flood -d flood"]
       interval: 5s
       retries: 20
+  migrate:
+    image: postgis/postgis:16-3.4
+    environment:
+      PGHOST: db
+      PGUSER: flood
+      PGDATABASE: flood
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./db:/migrations:ro
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-f", "/migrations/002_provenance.sql"]
+    depends_on:
+      db:
+        condition: service_healthy
   api:
     build: ./backend
     environment:
@@ -24,8 +37,19 @@ services:
       - ./data/models:/app/models:ro
     ports: ["127.0.0.1:8000:8000"]
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+  hii-import:
+    profiles: ["hii-import"]
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://flood:${POSTGRES_PASSWORD}@db:5432/flood
+    volumes:
+      - hiiarchive:/app/archive
+    command: ["python", "-m", "app.hii_archive", "--station", "${HII_STATION:-CPY001}", "--month", "${HII_MONTH:-202609}", "--destination", "/app/archive", "--source-timezone", "Asia/Bangkok", "--accept-non-commercial", "--import-db"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
   web:
     build: ./frontend
     environment:
@@ -50,3 +74,4 @@ volumes:
   pgdata:
   airflowdata:
   providercache:
+  hiiarchive:

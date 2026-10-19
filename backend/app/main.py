@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from shapely.geometry import shape
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.2.0")
+app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.3.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 class PointRequest(BaseModel):
@@ -98,3 +98,12 @@ def model_point(lat: float = Query(ge=-90,le=90,allow_inf_nan=False), lon: float
         except ValueError:raise HTTPException(422,"Timezone-aware ISO8601 timestamp required")
     try: return sample(lat,lon,at)
     except ModelRejected:raise HTTPException(503,"Model output failed quality checks")
+
+@app.get('/v1/observations')
+def observations(station_id: str = Query(min_length=1,max_length=100),start: datetime | None = None,end: datetime | None = None):
+    from .repository import observation_series
+    try:result=observation_series(station_id,start,end)
+    except ValueError as e:raise HTTPException(422,str(e))
+    except Exception:raise HTTPException(503,'Observation database unavailable')
+    if result is None:raise HTTPException(404,'Approved station not found')
+    return result

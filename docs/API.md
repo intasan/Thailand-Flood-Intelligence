@@ -18,3 +18,8 @@ Assessment metadata: UTC generated_at is response time, not an observation times
 Public provider adapters use cache and single-host shared quotas, never arbitrary fetch URLs. They can be disabled with PUBLIC_DATA_ENABLED=false. Source timestamps and dataset release are distinguished. Seven-day cached fetch time is displayed; no claim of a new terrain survey.
 
 Operator import and hydraulic package contracts: see OPERATIONS.md. API exposes no unauthenticated write/approval endpoint. Raw-file ingestion performs a transaction and keeps existing station/timestamp records immutable; correction revisions require separate work.
+
+## v0.3 additions
+`GET /v1/observations?station_id=HII:CPY001&start=<aware-ISO>&end=<aware-ISO>` returns approved-station metadata, raw-checksum-linked observations, timestamps, source flags, explicit timezone assumptions and gaps without interpolation. Default interval is the final available 24 hours in the archive, not current conditions. Limit: 31 days / 10,000 rows. Unknown station 404, bad interval 422, unavailable database 503.
+
+Nearby stations now include `station_metadata` and `observation_metadata`. Historical source identity, timezone assumptions and source provenance must remain visible when consumers display these data.

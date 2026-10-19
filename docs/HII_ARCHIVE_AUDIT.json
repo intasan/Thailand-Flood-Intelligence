@@ -1,0 +1,33 @@
+{
+  "source_rows": 4320,
+  "accepted_rows": 4304,
+  "quarantined_rows": 16,
+  "raw_sha256": "8970148470848da97113b72c3586d8f9ab62d88ab634c979cd08e8476f2f4d98",
+  "source_timezone": "Asia/Bangkok",
+  "timestamp_status": "assumed_timezone_source_has_no_offset",
+  "vertical_datum": "HII_MSL_AS_PUBLISHED; EGM2008 transformation unverified",
+  "data_type": "historical_station_observation",
+  "license": "Creative Commons Attribution Non-Commercial; version not stated in catalog",
+  "catalog_url": "https://data.go.th/th/dataset/water-level",
+  "station": {
+    "id": "HII:CPY001",
+    "lat": 15.6885,
+    "lon": 100.12388,
+    "name": "สะพานเดชาติวงศ์",
+    "basin": "เจ้าพระยา",
+    "province": "นครสวรรค์",
+    "metadata_sha256": "a9260351d56bf45087e96b4f47549de8eff23fac13ffc6ca09d33615ce164a2d"
+  },
+  "source_url": "https://tiservice.hii.or.th/opendata/data_catalog/water_level/2026/202609/CPY001.csv",
+  "first_accepted_at": "2026-09-01T00:00:00+07:00",
+  "last_accepted_at": "2026-09-30T23:50:00+07:00",
+  "readiness": {
+    "historical_water_level": true,
+    "live_water_level": false,
+    "verified_datum_transform": false,
+    "verified_timestamp_offset": false,
+    "discharge_rating_curve": false,
+    "surveyed_channel_cross_sections": false,
+    "validated_hydraulic_model": false
+  }
+}

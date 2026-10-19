@@ -5,6 +5,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN python -c "import rasterio, pyproj, psycopg"
 COPY app app
-RUN mkdir -p /app/cache /app/models && chown -R 10001:10001 /app/cache /app/models
+RUN mkdir -p /app/cache /app/models /app/archive && chown -R 10001:10001 /app/cache /app/models /app/archive
 USER 10001
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

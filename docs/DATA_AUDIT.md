@@ -17,3 +17,8 @@ Additional required inputs: RID discharge and operations, TMD/radar rainfall, ti
 - Open-Meteo Elevation API (https://open-meteo.com/en/docs/elevation-api): Copernicus 2021 GLO-90, approximately 90 m surface elevation. Provider fetch timestamp is distinct from dataset release and observation time. Source vertical reference EGM2008 follows the Copernicus handbook, not a verified Thai station transformation.
 - Free API is non-commercial only (https://open-meteo.com/en/terms); CC-BY attribution displayed. A contracted/commercial provider is required for commercial operation. Quota and cache are implemented, not unlimited API use.
 - Live smoke calls successfully retrieved Bangkok location candidates and an elevation response for 13.75,100.5. A response is source connectivity evidence, not local accuracy validation or a flood forecast.
+
+## HII archive verified in v0.3
+Official catalog `water-level` / dataset ID `334aa20b-8187-430a-b8c5-d924f37334fe`; source root https://tiservice.hii.or.th/opendata/data_catalog/water_level/. Catalogue licence: Creative Commons Attribution Non-Commercial; no version supplied. Catalog says 10-minute MSL observations and monthly publication. Sentinel values are explicitly documented. Quality flag N=Normal is documented in Thaiwater Standard's quality flags page.
+
+Canonical metadata and CPY001 September 2026 CSV were downloaded and parsed. The source contains 4,320 rows: 4,304 N-flag rows accepted and 16 non-N rows quarantined. Detailed checksums and coordinates are in HII_ARCHIVE_AUDIT.json. Raw archive data is not bundled into source code and is never represented as current observations. Timestamp zone and station-to-EGM2008 datum ties are unverified. The data-audit candidate is not a calibrated hydraulic pilot.
