@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Thailand Flood Intelligence Research API",
-    "version": "0.3.0"
+    "version": "0.4.0"
   },
   "paths": {
     "/health/live": {
@@ -409,6 +409,22 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/readiness": {
+      "get": {
+        "summary": "Readiness",
+        "operationId": "readiness_v1_readiness_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }

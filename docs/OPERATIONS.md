@@ -42,3 +42,8 @@ Canonical 0all_stn_metadata.csv has explicit named coordinate fields. A sampled 
 Airflow DAG `hii_historical` is manual-only. Set accept_non_commercial=true when intentionally triggering a non-commercial import. It has no automatic schedule and produces no forecasts.
 
 `/v1/observations?station_id=HII:CPY001` defaults to the last available day in the archive, not the current day. Optional start/end must be timezone-aware and span at most 31 days; results are capped at 10,000. Gaps greater than 15 minutes are reported without interpolation. This heuristic is a display aid, not the agency's official completeness rating. The dashboard labels historical readings and shows timezone/datum limitations.
+
+## Model integrity and reviewer configuration (v0.4)
+Model package schema version 2 is required. Read MODEL_REVIEW.md before installing a model. The API trust-store location is MODEL_REVIEWERS_FILE; Compose mounts `data/reviewers` separately from `data/models`, read-only. No default production reviewer public key or private key is shipped. Existing unsigned/version-1 packages intentionally become rejected; there is no bypass flag. Missing approval evidence cannot be replaced with self-asserted manifest fields.
+
+`/readiness` and `/v1/readiness` distinguish imported archive observations, missing live feed, missing survey registry, integrity-checked reviewed packages and disabled public property risk. A database outage produces unknown counts, not zero observations or a safe-risk claim.

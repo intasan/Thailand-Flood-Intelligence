@@ -23,3 +23,6 @@ Operator import and hydraulic package contracts: see OPERATIONS.md. API exposes 
 `GET /v1/observations?station_id=HII:CPY001&start=<aware-ISO>&end=<aware-ISO>` returns approved-station metadata, raw-checksum-linked observations, timestamps, source flags, explicit timezone assumptions and gaps without interpolation. Default interval is the final available 24 hours in the archive, not current conditions. Limit: 31 days / 10,000 rows. Unknown station 404, bad interval 422, unavailable database 503.
 
 Nearby stations now include `station_metadata` and `observation_metadata`. Historical source identity, timezone assumptions and source provenance must remain visible when consumers display these data.
+
+## v0.4 integrity gates and readiness
+GET /v1/readiness reports actual imported-data availability and explicit unavailable/disabled capabilities. `/readiness` renders it for the public. `/v1/models/point` now requires schema-v2 evidence files and a valid enabled external reviewer signature, plus full raster value/grid checks. See MODEL_REVIEW.md for the machine contract. Missing/mismatched/revoked evidence never results in a public flood-depth value.

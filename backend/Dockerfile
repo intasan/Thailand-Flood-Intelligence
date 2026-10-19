@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libexpat1 libst
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -c "import rasterio, pyproj, psycopg"
+RUN python -c "import rasterio, pyproj, psycopg, cryptography"
 COPY app app
 RUN mkdir -p /app/cache /app/models /app/archive && chown -R 10001:10001 /app/cache /app/models /app/archive
 USER 10001

@@ -49,3 +49,12 @@ def test_model_unknown_without_files(tmp_path,monkeypatch):
     monkeypatch.setenv('MODEL_DIRECTORY',str(tmp_path))
     result=c.get('/v1/models/point?lat=13&lon=100').json()
     assert result['status']=='unsupported' and result['flood_depth_m'] is None
+
+def test_readiness_never_claims_live_feed_or_property_risk(monkeypatch,tmp_path):
+    monkeypatch.delenv('DATABASE_URL',raising=False)
+    monkeypatch.setenv('MODEL_DIRECTORY',str(tmp_path))
+    result=c.get('/v1/readiness').json()
+    statuses={r['id']:r['status'] for r in result['steps']}
+    assert statuses['live']=='not_configured' and statuses['risk']=='not_enabled'
+    assert statuses['archive']=='unknown_database_unavailable'
+    assert result['review_signature_required'] is True

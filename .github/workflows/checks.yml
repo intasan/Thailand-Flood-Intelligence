@@ -50,6 +50,8 @@ jobs:
           curl --fail --retry 15 --retry-delay 2 --retry-all-errors http://localhost:8000/health/ready
           curl --fail --retry 15 --retry-delay 2 --retry-all-errors http://localhost:3000/api/v1/status
           curl --fail http://localhost:3000/api/openapi.json
+          curl --fail http://localhost:3000/api/v1/readiness
+          curl --fail http://localhost:3000/readiness
       - name: Import and query one real HII historical station-month
         run: |
           docker compose --profile hii-import run --rm hii-import

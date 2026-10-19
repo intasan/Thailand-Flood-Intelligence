@@ -7,3 +7,4 @@ rasterio==1.4.3
 pytest==8.3.5
 socksio==1.0.0
 pyproj==3.7.1
+cryptography==50.0.2

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from shapely.geometry import shape
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.3.0")
+app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.4.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 class PointRequest(BaseModel):
@@ -107,3 +107,20 @@ def observations(station_id: str = Query(min_length=1,max_length=100),start: dat
     except Exception:raise HTTPException(503,'Observation database unavailable')
     if result is None:raise HTTPException(404,'Approved station not found')
     return result
+
+@app.get('/v1/readiness')
+def readiness():
+    from .repository import data_status
+    from .models import catalog
+    try:
+        data=data_status();archive_state='available' if data['observation_count']>0 else 'not_imported'
+    except Exception:
+        data={'database':'unavailable','observation_count':None,'station_count':None};archive_state='unknown_database_unavailable'
+    packages,rejected=catalog()
+    return {'generated_at':datetime.now(timezone.utc).isoformat(),'data':data,'review_signature_required':True,'reviewed_model_count':len(packages),'rejected_model_count':rejected,
+        'steps':[{'id':'archive','label':'ข้อมูลระดับน้ำในคลัง','status':archive_state},
+                 {'id':'live','label':'แหล่งระดับน้ำสดที่ยืนยันสิทธิ์ใช้แล้ว','status':'not_configured'},
+                 {'id':'survey','label':'ทะเบียนข้อมูลสำรวจพื้นที่นำร่องและการเทียบ datum','status':'not_registered'},
+                 {'id':'model','label':'แพ็กเกจแบบจำลองที่ผ่านตรวจรับ','status':'available' if packages else 'not_available'},
+                 {'id':'risk','label':'ผลวิเคราะห์ความเสี่ยงน้ำท่วมรายที่ดิน','status':'not_enabled'}],
+        'limitations':['ข้อมูลเก่าหรือข้อมูลที่ยังไม่รองรับไม่ใช่หลักฐานว่าปลอดภัย','การตรวจลายเซ็นและไฟล์หลักฐานไม่ทดแทนการรับรองทางอุทกวิทยา','ระบบยังไม่เชื่อม feed ระดับน้ำสดและยังไม่เปิดผลความเสี่ยงรายที่ดิน']}

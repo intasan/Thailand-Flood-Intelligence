@@ -32,9 +32,11 @@ services:
       PROVIDER_CACHE_PATH: /app/cache/providers.sqlite
       PUBLIC_DATA_ENABLED: ${PUBLIC_DATA_ENABLED:-true}
       MODEL_DIRECTORY: /app/models
+      MODEL_REVIEWERS_FILE: /app/reviewers/reviewers.json
     volumes:
       - providercache:/app/cache
       - ./data/models:/app/models:ro
+      - ./data/reviewers:/app/reviewers:ro
     ports: ["127.0.0.1:8000:8000"]
     depends_on:
       migrate:
