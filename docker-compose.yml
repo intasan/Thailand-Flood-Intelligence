@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: flood
+      POSTGRES_USER: flood
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flood -d flood"]
+      interval: 5s
+      retries: 20
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://flood:${POSTGRES_PASSWORD}@db:5432/flood
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    build: ./frontend
+    environment:
+      API_INTERNAL_URL: http://api:8000
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+  airflow:
+    image: apache/airflow:2.10.5
+    profiles: ["pipeline"]
+    command: standalone
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    ports: ["127.0.0.1:8080:8080"]
+    volumes:
+      - ./pipelines/dags:/opt/airflow/dags:ro
+      - ./data:/opt/airflow/data:ro
+      - airflowdata:/opt/airflow
+volumes:
+  pgdata:
+  airflowdata:
