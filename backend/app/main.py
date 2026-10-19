@@ -3,9 +3,12 @@ import os
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from shapely.geometry import shape
+from shapely.geometry.polygon import orient
+from .http_limits import RequestBodyLimit
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.4.0")
+app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.5.0")
+app.add_middleware(RequestBodyLimit)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 class PointRequest(BaseModel):
@@ -36,8 +39,8 @@ def ready():
         with psycopg.connect(os.environ["DATABASE_URL"], connect_timeout=3) as c:
             c.execute("SELECT PostGIS_Version()")
             c.execute("SELECT 1 FROM sources LIMIT 1")
-            c.execute("SELECT 1 FROM stations LIMIT 1")
-            c.execute("SELECT 1 FROM observations LIMIT 1")
+            c.execute("SELECT metadata FROM stations LIMIT 1")
+            c.execute("SELECT metadata FROM observations LIMIT 1")
     except Exception:
         raise HTTPException(503, "PostGIS unavailable")
     return {"status": "ready"}
@@ -63,18 +66,26 @@ def parcel(p: ParcelRequest):
         if not all(-180 <= x <= 180 and -90 <= y <= 90 for ring in [g.exterior,*g.interiors] for x,y,*_ in ring.coords): raise ValueError()
         if g.has_z: raise ValueError()
     except Exception: raise HTTPException(422, "Valid 2D WGS84 Polygon required; maximum 1000 vertices")
-    result=assessment(g.centroid.y,g.centroid.x)
+    representative=g.representative_point()
+    result=assessment(representative.y,representative.x)
+    result["location"]["role"]="representative_point_for_display_only"
     from pyproj import Geod
-    area,perimeter=Geod(ellps="WGS84").geometry_area_perimeter(g)
+    geod=Geod(ellps="WGS84")
+    area,_=geod.geometry_area_perimeter(orient(g,sign=1.0))
+    perimeter=geod.line_length(*g.exterior.xy)
     result["area_m2"]=abs(area)
     result["perimeter_m"]=perimeter
+    result["total_boundary_m"]=sum(geod.line_length(*ring.xy) for ring in [g.exterior,*g.interiors])
+    result["area_method"]="WGS84 ellipsoidal polygon; holes subtracted; perimeter_m is exterior only"
     result["geometry"]=p.geometry
-    result["aggregation"]="unavailable; centroid is a display location, not parcel-wide analysis"
+    result["aggregation"]="unavailable; representative point is a display location, not parcel-wide analysis"
     return result
 
 @app.get("/v1/geocode")
 def geocode(q: str = Query(min_length=2, max_length=160)):
     from .providers import geocode as search, ProviderUnavailable
+    q=q.strip()
+    if len(q)<2:raise HTTPException(422,"Search term requires at least two non-whitespace characters")
     try: return search(q)
     except (ProviderUnavailable, OSError, __import__("sqlite3").Error) as e: raise HTTPException(503, str(e))
 

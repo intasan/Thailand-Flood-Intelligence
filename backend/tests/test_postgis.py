@@ -54,3 +54,11 @@ def test_hii_import_preserves_raw_provenance_and_series(database):
     assert result['count']==2 and len(result['gaps'])==1
     assert result['results'][0]['raw_sha256']==report['raw_sha256']
     assert result['results'][0]['metadata']['timestamp_status'].startswith('assumed')
+
+def test_revoked_source_disappears_from_public_counts_and_station_query(database):
+    with psycopg.connect(database) as c:
+        c.execute("INSERT INTO observations(station_id,observed_at,value,unit,raw_sha256) VALUES ('TEST','2020-01-01T00:00:00Z',1,'m','test')")
+        c.execute("UPDATE sources SET approval_status='rejected' WHERE id='TEST'")
+    status=data_status()
+    assert status['station_count']==0 and status['observation_count']==0 and status['latest_observed_at'] is None
+    assert nearby_stations(13,100,10)['results']==[]

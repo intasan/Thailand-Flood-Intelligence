@@ -26,3 +26,12 @@ Nearby stations now include `station_metadata` and `observation_metadata`. Histo
 
 ## v0.4 integrity gates and readiness
 GET /v1/readiness reports actual imported-data availability and explicit unavailable/disabled capabilities. `/readiness` renders it for the public. `/v1/models/point` now requires schema-v2 evidence files and a valid enabled external reviewer signature, plus full raster value/grid checks. See MODEL_REVIEW.md for the machine contract. Missing/mismatched/revoked evidence never results in a public flood-depth value.
+
+## v0.5 correctness and request limits
+Parcel calculations normalize exterior/hole ring orientation before ellipsoidal area calculation. `location` is an interior representative point for display, not a centroid flood estimate. `perimeter_m` is the exterior boundary; `total_boundary_m` additionally includes holes. Returned area remains an approximation from user-drawn boundaries, not a cadastral survey. The Dashboard displays square metres and Thai land units (1 rai = 1600 m², 1 ngan = 400 m², 1 square wah = 4 m²), rounded consistently to 0.01 square wah.
+
+Public station/observation counts are restricted to approved sources with licence evidence, with `count_scope=approved_licensed_sources_only`. Withdrawn sources are excluded from both map queries and public availability counts.
+
+POST request bodies are bounded to 64,000 bytes before API JSON/GIS processing, including chunked bodies without Content-Length. The Next proxy enforces the same byte limit, a total body-read deadline and JSON media type; it forwards documented read/assessment routes only. Oversize=413, invalid media type at proxy=415, invalid UTF-8 at proxy=400, timed-out body=408. Proxy responses explicitly use Cache-Control: no-store; provider's separate server cache retains its documented TTL.
+
+Provider payloads are validated before caching. Malformed previously cached entries are evicted and fetched again. Invalid coordinates/admin objects or elevation shapes never become cached data or fallback measurements. Empty/whitespace-only place searches are rejected before upstream access.

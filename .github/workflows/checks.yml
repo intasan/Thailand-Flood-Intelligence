@@ -52,6 +52,7 @@ jobs:
           curl --fail http://localhost:3000/api/openapi.json
           curl --fail http://localhost:3000/api/v1/readiness
           curl --fail http://localhost:3000/readiness
+          curl --fail -X POST -H "Content-Type: application/json" -d '{"lat":13.75,"lon":100.5}' http://localhost:3000/api/v1/assess | python -c "import json,sys; d=json.load(sys.stdin); assert d['risk']=='unknown'; assert d['flood_depth_m'] is None"
       - name: Import and query one real HII historical station-month
         run: |
           docker compose --profile hii-import run --rm hii-import

@@ -47,3 +47,10 @@ Airflow DAG `hii_historical` is manual-only. Set accept_non_commercial=true when
 Model package schema version 2 is required. Read MODEL_REVIEW.md before installing a model. The API trust-store location is MODEL_REVIEWERS_FILE; Compose mounts `data/reviewers` separately from `data/models`, read-only. No default production reviewer public key or private key is shipped. Existing unsigned/version-1 packages intentionally become rejected; there is no bypass flag. Missing approval evidence cannot be replaced with self-asserted manifest fields.
 
 `/readiness` and `/v1/readiness` distinguish imported archive observations, missing live feed, missing survey registry, integrity-checked reviewed packages and disabled public property risk. A database outage produces unknown counts, not zero observations or a safe-risk claim.
+
+## v0.5 user-facing corrections
+Parcel area supports valid Polygon holes regardless of ring direction. A representative point inside the parcel is used only as a display location; flood inference for the whole parcel remains unsupported. Thai area-unit display is rounded and approximate. Property GeoJSON exports include the calculated area and method label, not a flood forecast.
+
+The browser and API now reject oversized POST bodies before geometric processing. The limit is 64,000 bytes, so very detailed polygons should be simplified with a GIS tool within the documented 1000-vertex limit. Provider cache entries are shape/type-checked before use and malformed older entries are evicted. A withdrawn source no longer contributes to public station or observation counts. WebGL initialization failure is caught so coordinate/place input can remain usable; actual browser/device testing is still outstanding.
+
+If a local Next/Turbopack incremental cache is damaged, stop the development server, run `npm run clean` from frontend, then `npm run build`. The cross-platform clean script removes only `.next` generated output; it does not delete source, database volumes or user data. Clean rebuild was verified after an observed local cache read failure.

@@ -1,4 +1,4 @@
-# Thailand Flood Intelligence — v0.4
+# Thailand Flood Intelligence — v0.5
 
 แพลตฟอร์มวิจัยสถานการณ์น้ำ แยก Public Dashboard และ Research API ใช้ข้อมูลที่มีแหล่งอ้างอิง และไม่สร้างค่าตรวจวัด/ผลพยากรณ์ปลอม
 
@@ -16,6 +16,8 @@ Dashboard: http://localhost:3000 · Research docs: http://localhost:3000/researc
 - ตัวนำเข้า HII archive จริงแบบมีสิทธิ์ใช้สำหรับงานวิจัยไม่ใช่เชิงพาณิชย์ พร้อมกักกันข้อมูลสูญหาย/flag ผิดปกติ ดูประวัติระดับน้ำและช่องว่างข้อมูลบน Dashboard
 - Research API อ่านสถานีและค่าล่าสุดจาก PostGIS พร้อมข้อมูลเก่า/ใหม่และ datum; ไม่มีข้อมูลสถานีตัวอย่างปะปนฐานจริง
 - นำเข้า CSV ที่ผู้ดูแลอนุมัติแบบ atomic/idempotent; Airflow รับไฟล์จริงจาก local inbox
+- คำนวณพื้นที่แปลงที่มีรูได้ถูกทิศ แสดงไร่–งาน–ตารางวา และใช้จุดแสดงผลภายในแปลงเว้า
+- ตรวจข้อมูลผู้ให้บริการก่อน cache และจำกัดขนาดคำขอก่อนประมวลผล GIS
 - หน้า /readiness แสดงข้อมูลที่มีจริงและส่วนที่ยังไม่รองรับ
 - ประตูตรวจรับแพ็กเกจผลแบบจำลองแบบมีลายเซ็นผู้ตรวจที่เชื่อถือและไฟล์หลักฐานจริงที่ผู้เชี่ยวชาญอนุมัติ ตรวจ checksum, validation, ช่วงเวลา, raster coverage/NoData ก่อนให้ Research API อ่าน
 - Swagger/OpenAPI, Docker Compose, automated tests และ GitHub Actions พร้อม PostGIS integration และ Compose smoke tests

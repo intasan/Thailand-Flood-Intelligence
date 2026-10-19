@@ -9,9 +9,9 @@ def connect():return psycopg.connect(os.environ['DATABASE_URL'],connect_timeout=
 
 def data_status():
     with connect() as c:
-        observations=c.execute('SELECT count(*) AS count,max(observed_at) AS latest FROM observations').fetchone()
-        stations=c.execute('SELECT count(*) AS count FROM stations').fetchone()['count']
-    return {'database':'ready','observation_count':observations['count'],'station_count':stations,'latest_observed_at':observations['latest']}
+        observations=c.execute("SELECT count(*) AS count,max(o.observed_at) AS latest FROM observations o JOIN stations s ON s.id=o.station_id JOIN sources src ON src.id=s.source_id WHERE src.approval_status='approved' AND length(src.license_evidence)>0").fetchone()
+        stations=c.execute("SELECT count(*) AS count FROM stations s JOIN sources src ON src.id=s.source_id WHERE src.approval_status='approved' AND length(src.license_evidence)>0").fetchone()['count']
+    return {'database':'ready','observation_count':observations['count'],'station_count':stations,'latest_observed_at':observations['latest'],'count_scope':'approved_licensed_sources_only'}
 
 
 def nearby_stations(lat,lon,radius_km):

@@ -58,3 +58,29 @@ def test_readiness_never_claims_live_feed_or_property_risk(monkeypatch,tmp_path)
     assert statuses['live']=='not_configured' and statuses['risk']=='not_enabled'
     assert statuses['archive']=='unknown_database_unavailable'
     assert result['review_signature_required'] is True
+
+def test_concave_parcel_display_point_is_inside():
+    from shapely.geometry import shape,Point
+    geometry={'type':'Polygon','coordinates':[[[100,13],[100.03,13],[100.03,13.01],[100.01,13.01],[100.01,13.03],[100,13.03],[100,13]]]}
+    polygon=shape(geometry)
+    assert not polygon.covers(polygon.centroid)
+    result=c.post('/v1/parcels/assess',json={'geometry':geometry}).json()
+    assert polygon.covers(Point(result['location']['lon'],result['location']['lat']))
+    assert result['risk']=='unknown'
+
+def test_hole_area_is_independent_of_ring_direction():
+    outer=[[100,13],[100.03,13],[100.03,13.03],[100,13.03],[100,13]]
+    hole=[[100.01,13.01],[100.02,13.01],[100.02,13.02],[100.01,13.02],[100.01,13.01]]
+    a=c.post('/v1/parcels/assess',json={'geometry':{'type':'Polygon','coordinates':[outer,hole]}}).json()
+    b=c.post('/v1/parcels/assess',json={'geometry':{'type':'Polygon','coordinates':[outer,list(reversed(hole))]}}).json()
+    whole=c.post('/v1/parcels/assess',json={'geometry':{'type':'Polygon','coordinates':[outer]}}).json()
+    assert abs(a['area_m2']-b['area_m2'])<.01
+    assert a['area_m2']<whole['area_m2']
+    assert a['total_boundary_m']>a['perimeter_m']
+
+def test_large_multibyte_request_rejected_before_geometry_processing():
+    body='{"geometry":{},"padding":"'+'ก'*22000+'"}'
+    assert c.post('/v1/parcels/assess',content=body.encode(),headers={'Content-Type':'application/json'}).status_code==413
+
+def test_whitespace_search_is_invalid_before_provider_request():
+    assert c.get('/v1/geocode?q=%20%20').status_code==422

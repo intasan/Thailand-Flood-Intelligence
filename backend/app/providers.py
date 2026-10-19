@@ -12,6 +12,30 @@ import httpx
 class ProviderUnavailable(Exception): pass
 
 
+def validate_payload(kind,payload):
+    if not isinstance(payload,dict) or payload.get('error'):raise ValueError('Invalid upstream data')
+    if kind=='geocode':
+        rows=payload.get('results',[])
+        if not isinstance(rows,list) or len(rows)>100:raise ValueError('Invalid result list')
+        for row in rows:
+            if not isinstance(row,dict):raise ValueError('Invalid location')
+            if row.get('country_code')!='TH':continue
+            if isinstance(row.get('id'),bool) or not isinstance(row.get('id'),int):raise ValueError('Invalid location ID')
+            if not isinstance(row.get('name'),str) or not row['name'] or len(row['name'])>500:raise ValueError('Invalid location name')
+            for field in ('admin1','admin2'):
+                if row.get(field) is not None and not isinstance(row[field],str):raise ValueError('Invalid admin name')
+            for field,limit in (('latitude',90),('longitude',180)):
+                v=row.get(field)
+                if isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) or abs(v)>limit:raise ValueError('Invalid location coordinate')
+    elif kind=='elevation':
+        values=payload.get('elevation')
+        if not isinstance(values,list) or len(values)!=1:raise ValueError('Invalid elevation list')
+        value=values[0]
+        if value is not None and (isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value)):raise ValueError('Invalid elevation value')
+    else:raise ValueError('Unknown provider kind')
+    return payload
+
+
 def request_json(kind, params, client=None):
     if os.getenv('PUBLIC_DATA_ENABLED', 'true').lower()!='true':
         raise ProviderUnavailable('Public research data disabled')
@@ -24,7 +48,11 @@ def request_json(kind, params, client=None):
         db.execute('CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, body TEXT NOT NULL, fetched REAL NOT NULL)')
         db.execute('CREATE TABLE IF NOT EXISTS quota (bucket TEXT PRIMARY KEY, count INTEGER NOT NULL)')
         hit=db.execute('SELECT body,fetched FROM cache WHERE key=? AND fetched>?',(key,now-86400*7)).fetchone()
-        if hit:return json.loads(hit[0]),datetime.fromtimestamp(hit[1],timezone.utc).isoformat(),True
+        if hit:
+            try:return validate_payload(kind,json.loads(hit[0])),datetime.fromtimestamp(hit[1],timezone.utc).isoformat(),True
+            except (ValueError,TypeError):
+                db.execute('DELETE FROM cache WHERE key=?',(key,))
+                db.commit()
         db.execute('BEGIN IMMEDIATE')
         # Shared SQLite file enforces quotas across workers on a single deployment.
         for bucket,limit in ((f'minute:{int(now//60)}',30),(f'day:{int(now//86400)}',500)):
@@ -34,13 +62,12 @@ def request_json(kind, params, client=None):
         db.commit()
     try:
         if client is None:
-            with httpx.Client(timeout=10,follow_redirects=False,headers={'User-Agent':'Thailand-Flood-Intelligence/0.2 (+https://github.com/intasan/Thailand-Flood-Intelligence)'}) as c:
+            with httpx.Client(timeout=10,follow_redirects=False,headers={'User-Agent':'Thailand-Flood-Intelligence/0.5 (+https://github.com/intasan/Thailand-Flood-Intelligence)'}) as c:
                 response=c.get(urls[kind],params=params)
         else:response=client.get(urls[kind],params=params)
         response.raise_for_status()
         if len(response.content)>1_000_000:raise ValueError('Upstream payload too large')
-        payload=response.json()
-        if not isinstance(payload,dict) or payload.get('error'):raise ValueError('Invalid upstream data')
+        payload=validate_payload(kind,response.json())
     except (httpx.HTTPError,ValueError,KeyError) as e:
         raise ProviderUnavailable('Upstream data unavailable; no substitute values used') from e
     with sqlite3.connect(path,timeout=3) as db:
