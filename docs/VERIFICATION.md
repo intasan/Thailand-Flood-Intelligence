@@ -115,3 +115,14 @@ All four jobs passed:
 - Pipeline: Airflow image and DAG import checks passed.
 
 The new CLI prepares local source-linked JSON only; it does not ingest a live rainfall feed or change PostGIS. All rainfall fixtures are synthetic and remain tests. No real catchment rainfall package is configured. Catchment-mean spatial processing and operator assertions require independent review. Complete precipitation volume is not runoff or discharge; missing intervals never become zero. No rainfall-to-runoff conversion, hydraulic routing, tide/barrier model, calibrated pilot, public flood-risk output or deployment was added. Browser/WebGL/GPS testing remains outstanding.
+
+## Local DEM integrity audit v1.0.0
+Tested code commit: `a1ccf405b27f9f6d1c6954e5149ba4e6749f7677`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39308404346
+All four jobs passed:
+- Backend: 156 tests passed with real PostGIS (local: 152 passed, 4 database skips). Twenty-seven new synthetic raster cases cover zero/negative elevations, masked versus unmasked non-finite pixels, entirely missing terrain, degree-versus-metre resolution, invalid metadata/checksums/CRS, rotated/south-up grids, bands/scales/units/datum contradictions, external masks, bounded edge-window scanning, JSON-safe NaN NoData, pixel limits and CLI success/rejection.
+- Frontend: existing 20 tests and production build passed; no frontend source change.
+- Compose: db/API/web smoke checks and actual HII historical import/query passed.
+- Pipeline: Airflow image and DAG import checks passed.
+
+The DEM CLI scans one local self-contained GeoTIFF and emits a read-only report. No real DEM was imported, no pilot boundary coverage was established and no vertical datum transformation or surveyed accuracy check was performed. Integrity success can coexist with no usable pixels; coverage status explicitly distinguishes this. Native geographic pixel spacing is never reported as metres. No calibrated hydraulic pilot, property-risk forecast or deployment was added; browser/WebGL/GPS QA remains outstanding.
