@@ -1,4 +1,4 @@
-# Thailand Flood Intelligence — v0.5
+# Thailand Flood Intelligence — v0.6
 
 แพลตฟอร์มวิจัยสถานการณ์น้ำ แยก Public Dashboard และ Research API ใช้ข้อมูลที่มีแหล่งอ้างอิง และไม่สร้างค่าตรวจวัด/ผลพยากรณ์ปลอม
 
@@ -11,6 +11,7 @@ Dashboard: http://localhost:3000 · Research docs: http://localhost:3000/researc
 
 ## มีอะไรใช้งานได้
 - Next.js / TypeScript / Tailwind / MapLibre แผนที่ OSM; GPS, พิกัด, Google Maps URL แบบมีพิกัด, วาด/ย้อนจุด/ส่งออกแปลง GeoJSON
+- นำเข้า Polygon GeoJSON พร้อมรูในแปลง แชร์พิกัด และดูกราฟระดับน้ำย้อนหลังพร้อมส่งออก CSV ที่เก็บ provenance
 - ค้นหาชุมชน/เมืองในไทยผ่าน GeoNames / Open-Meteo พร้อมรายการให้เลือก ไม่รับประกันที่อยู่รายบ้าน
 - อ่านความสูงพื้นผิว Copernicus GLO-90 ผ่าน Open-Meteo พร้อมแหล่งที่มา เวลา ความละเอียด 90 ม. และ datum EGM2008 ไม่อ้างว่าเป็นค่ารังวัดพื้นดินรายบ้าน
 - ตัวนำเข้า HII archive จริงแบบมีสิทธิ์ใช้สำหรับงานวิจัยไม่ใช่เชิงพาณิชย์ พร้อมกักกันข้อมูลสูญหาย/flag ผิดปกติ ดูประวัติระดับน้ำและช่องว่างข้อมูลบน Dashboard

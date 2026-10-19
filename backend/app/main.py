@@ -7,7 +7,7 @@ from shapely.geometry.polygon import orient
 from .http_limits import RequestBodyLimit
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.5.0")
+app = FastAPI(title="Thailand Flood Intelligence Research API", version="0.6.0")
 app.add_middleware(RequestBodyLimit)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
