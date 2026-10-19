@@ -54,3 +54,18 @@ Local backend result was 40 passed / 3 database skips; remote CI ran all 43 with
 Schema-v2 review evidence and an external enabled Ed25519 reviewer key are now mandatory for research model outputs. No production reviewer or hydraulic package is configured. Integrity checks do not certify the reviewer or model physics; human verification remains required. No live-water adapter, surveyed pilot registry, public property-risk output or hosted deployment has been enabled.
 
 A direct HTTP check of the official October 2026 archive directory returned 200 with no CSV links at inspection. This records the observed archive state only and does not establish whether other agencies have live data. The platform continues to label historical data explicitly and reports the live feed as not_configured.
+
+## v0.5 — parcel correctness, cache recovery, bounded requests and public counts
+Tested code commit: `53994131fb4f102e295ec992992cab8e925db4f7`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39301445818
+All four jobs completed successfully:
+- Backend: 53 passed with real PostGIS, including concave-parcel display-point containment; area invariance for reversed hole direction; hole/exterior boundary distinction; multi-byte and chunked body limits; unchanged valid-body replay; whitespace search rejection; malformed provider response rejection and old-cache recovery; withdrawal of a source from public counts and spatial queries.
+- Frontend: 10 Node tests passed for API route restrictions, streaming UTF-8 byte limits, media type, malformed encoding, total body-read timeout, Thai area conversion/rounding and existing coordinate parsing. Production build and TypeScript passed.
+- Compose: full db/migration/API/web stack passed health, proxy/OpenAPI/readiness checks and a JSON POST assessment through the Next proxy. Real HII archive import/query still passed.
+- Pipeline: Airflow image and DAG import checks passed.
+
+Local backend: 49 passes, 4 database skips; CI ran all 53 with no skips. A local Turbopack incremental-cache read failure was corrected by removing generated .next output with the new cross-platform clean script; clean production build then passed. No source or user data were removed.
+
+Parcel areas remain approximate ellipsoidal calculations from submitted boundaries, not certified land surveys. Display points are for location display only; no parcel flood inference is derived. Invalid provider payloads are never cached as usable data. Body limits apply before JSON/GIS processing. Public counts exclude withdrawn/unlicensed sources.
+
+WebGL initialization failure is handled in code to preserve location inputs, but browser interaction/WebGL/GPS visual testing remains unexecuted. There is still no live gauge feed, calibrated operational hydraulic pilot, property-risk forecast or hosted deployment. Software checks above do not establish hydrologic validity.
