@@ -126,3 +126,14 @@ All four jobs passed:
 - Pipeline: Airflow image and DAG import checks passed.
 
 The DEM CLI scans one local self-contained GeoTIFF and emits a read-only report. No real DEM was imported, no pilot boundary coverage was established and no vertical datum transformation or surveyed accuracy check was performed. Integrity success can coexist with no usable pixels; coverage status explicitly distinguishes this. Native geographic pixel spacing is never reported as metres. No calibrated hydraulic pilot, property-risk forecast or deployment was added; browser/WebGL/GPS QA remains outstanding.
+
+## Integrated pilot input preflight v1.0.0
+Tested code commit: `0a5a8333c2d2c2d9423f44da4e76e8a15c91c62a`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39311398156
+All four jobs passed:
+- Backend: 175 tests passed with real PostGIS (local: 171 passed / 4 database skips before the final CLI exception-handler expansion). Nineteen new synthetic end-to-end cases cover consistent bundle hashes, incomplete rainfall, missing pixels inside/outside catchments and holes, fully/partly uncovered catchments, projected-raster transformation, DSM blockers, invalid path/hash/schema cases, symlink escapes, global work limits and CLI success/rejection without success stdout.
+- Frontend: existing 20 tests and production build passed; no frontend source changes.
+- Compose: complete db/API/web smoke checks and actual HII historical import/query passed.
+- Pipeline: Airflow image and DAG import checks passed.
+
+This integrates prior source-input audits and approximate catchment-specific DEM coverage. No real pilot bundle is configured. Reports keep input blockers separate from scientific blockers and always return hydraulic_ready=false. Approximate densified boundaries/all-touched pixels do not establish surveyed coverage, datum alignment or real hydraulic connectivity. No solver, calibrated rainfall/runoff model, independent hydraulic event validation, public property-risk output or deployment was added. Browser/WebGL/GPS QA remains outstanding.
