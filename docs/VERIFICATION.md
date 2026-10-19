@@ -159,3 +159,14 @@ All four jobs passed:
 - Pipeline: Airflow image and DAG import checks passed.
 
 Export preserves HII historical source constraints and published MSL datum; it does not resolve timezone uncertainty or transform to EGM2008/model datum. Snapshot export time is explicitly distinguished from original source download time. The observation descriptor identifies original raw-file hashes rather than inventing an agency release. CI output files were temporary container test outputs, not a published data release. There is still no real calibrated model simulation/held-out hydraulic validation, operational flood-risk forecast or deployment. Browser/WebGL/GPS QA remains outstanding.
+
+## Executed manual Airflow HII research-export DAG
+Tested code commit: `17ea13600c8cab3aca9b6ca234fc11b4f6e9c70f`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39316100227
+All four jobs passed:
+- Backend: 235 tests passed with real PostGIS (local: 230 passed / 5 database skips). Twelve new job-wrapper cases cover bounded station/request IDs, required non-commercial acknowledgement, interval/window validation, rejection before database/output access, fixed N flag, non-overwrite behavior and symlink rejection.
+- Frontend: existing 20 tests and production build passed; no frontend source change.
+- Pipeline: Airflow image and DAG imports passed, including assertions that the new DAG has no schedule, one active run, zero task retries and non-commercial acknowledgement false by default.
+- Compose: full stack and actual HII import/export checks passed. The Airflow image was separately built, its temporary metadata database migrated, and `airflow dags test hii_observation_export` actually executed against PostGIS. The task exported 144 actual CPY001 observations with 144 accepted / 0 absent intervals, CSV SHA256 `046a5ac9ffe1eff847ae44804db3be1c3b148523918c6ea137cca98792bb3a54`, preserved source timezone assumptions and `simulation_generated=False`. The DagRun database state was independently checked as success and the exported file hash was verified.
+
+The observation-only Airflow path no longer eagerly loads GIS dependencies. The DAG is unscheduled and requires an explicit request ID/window/rights acknowledgement; existing exports are not reused. XCom/logs contain small receipts, not measured records or credentials. CI used temporary local container test volumes which were removed afterwards; no hosted scheduler, deployment or published dataset was enabled. There is still no calibrated operational hydraulic pilot or public property-risk forecast, and browser/WebGL/GPS QA remains outstanding.
