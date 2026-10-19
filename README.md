@@ -43,6 +43,6 @@ PostGIS integration tests require TEST_DATABASE_URL pointing to a disposable tes
 
 นำเข้าข้อมูลย้อนหลังจริง (เฉพาะการวิจัยไม่ใช่เชิงพาณิชย์): `docker compose --profile hii-import run --rm hii-import` ค่าเริ่มต้น CPY001 กันยายน 2569 ไม่ใช่ข้อมูลสด
 
-เอกสาร: [Operations](docs/OPERATIONS.md), [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), [Data audit](docs/DATA_AUDIT.md), [Verification](docs/VERIFICATION.md)
+เอกสาร: [Operations](docs/OPERATIONS.md), [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), [Data audit](docs/DATA_AUDIT.md), [Pilot readiness](docs/PILOT_READINESS.md), [Verification](docs/VERIFICATION.md)
 
 ยังไม่มี hosted deployment. ไม่มีข้อมูลไม่ได้หมายถึงปลอดภัยจากน้ำท่วม

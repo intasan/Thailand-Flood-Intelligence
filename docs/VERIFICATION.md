@@ -26,3 +26,16 @@ Live calls returned Bangkok location candidates and a Thai-language result for �
 - Public APIs and map tiles have usage/licence limits. A successful response is not unlimited production entitlement; see DATA_AUDIT.md and OPERATIONS.md.
 
 Local backend execution: 25 passed and 2 PostGIS tests skipped because no local database runtime exists. The remote backend CI supplied real PostGIS and passed all 27, with no skips. CI warnings are dependency deprecations, not test failures.
+
+## v0.3 — HII historical source, schema and UI
+Tested code commit: `5790877c4d06945110d198bc866b6ba8c97737e9`.
+Verified GitHub Actions run: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39298275779
+All four jobs completed successfully:
+- Backend: 31 tests passed, including real PostGIS schema migration, HII provenance import idempotency, archive-series gaps and previous regression cases. Local-only run had 28 passes and 3 database skips; remote CI supplied PostGIS and had no skips.
+- Frontend: coordinate tests, TypeScript and production build passed for station history/metadata UI.
+- Pipeline: custom Airflow image built; manual `hii_historical` and other DAGs imported without errors. This does not claim a full Airflow task execution.
+- Compose: db → additive migration → API/web startup passed. Real HII canonical metadata and CPY001 September 2026 CSV were downloaded within the importer container, 4,304 rows inserted, 16 quarantined; the same raw-file SHA256 matched local inspection. The Next proxy successfully returned 145 observations covering the final available 24-hour interval (inclusive endpoints). No operational dataset was fabricated.
+
+HII history is monthly published archive data, not a live feed. Source timestamps lack an offset and retain an explicit Asia/Bangkok assumption. The MSL-to-EGM2008 transformation is unverified. Only N-flag data pass this import policy; this does not certify physical accuracy. Raw source files are not bundled into the source repository. The data licence remains non-commercial attribution as stated by the official catalog.
+
+No browser/WebGL/GPS visual-interaction test, live gauge feed, independently calibrated hydraulic pilot, property flood-risk calculation or hosted deployment has been completed. See PILOT_READINESS.md for concrete missing inputs. The passing software tests do not remove those scientific and data limitations.
