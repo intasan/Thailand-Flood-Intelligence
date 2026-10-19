@@ -24,6 +24,7 @@ Dashboard: http://localhost:3000 · Research docs: http://localhost:3000/researc
 - ตัวตรวจ DEM GeoTIFF แบบ offline: CRS/datum/หน่วย/ขนาดพิกเซล/checksum และนับ NoData ทั้งไฟล์ โดยยังไม่รับรองความแม่นยำหรือพื้นที่นำร่อง (ดู [DEM_AUDIT.md](docs/DEM_AUDIT.md))
 - คำสั่งตรวจชุดพื้นที่นำร่องรวม network/catchment/ฝน/DEM พร้อมตรวจ DEM ครอบคลุมพื้นที่รับน้ำ และรายงาน input/scientific blockers (ดู [PILOT_PREFLIGHT.md](docs/PILOT_PREFLIGHT.md))
 - ตัวเทียบระดับน้ำตรวจวัดกับผลแบบจำลองตามสถานี/เวลา UTC: MAE/RMSE/bias พร้อมจำนวนข้อมูลขาด โดยไม่อนุมัติแบบจำลองอัตโนมัติ (ดู [LEVEL_VALIDATION.md](docs/LEVEL_VALIDATION.md))
+- ส่งออกข้อมูล HII จริงจาก PostGIS เป็นชุดค่าตรวจวัดสำหรับเทียบแบบจำลอง พร้อมต้นฉบับ/quality/timezone และไม่สร้างผลจำลอง (ดู [OBSERVATION_EXPORT.md](docs/OBSERVATION_EXPORT.md))
 - หน้า /readiness แสดงข้อมูลที่มีจริงและส่วนที่ยังไม่รองรับ
 - ประตูตรวจรับแพ็กเกจผลแบบจำลองแบบมีลายเซ็นผู้ตรวจที่เชื่อถือและไฟล์หลักฐานจริงที่ผู้เชี่ยวชาญอนุมัติ ตรวจ checksum, validation, ช่วงเวลา, raster coverage/NoData ก่อนให้ Research API อ่าน
 - Swagger/OpenAPI, Docker Compose, automated tests และ GitHub Actions พร้อม PostGIS integration และ Compose smoke tests

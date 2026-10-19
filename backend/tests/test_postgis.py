@@ -62,3 +62,20 @@ def test_revoked_source_disappears_from_public_counts_and_station_query(database
     status=data_status()
     assert status['station_count']==0 and status['observation_count']==0 and status['latest_observed_at'] is None
     assert nearby_stations(13,100,10)['results']==[]
+
+
+def test_hii_export_read_only_snapshot_and_revocation(database,tmp_path):
+    from app.observation_export import export_observations
+    from app.hii_archive import SOURCE
+    test_hii_import_preserves_raw_provenance_and_series(database)
+    before=data_status()['observation_count']
+    target=tmp_path/'export'
+    result=export_observations('HII:TEST_ONLY','2019-12-31T17:00:00Z','2019-12-31T17:30:00Z',600,['N'],target)
+    assert result['rows']==2 and result['absent_intervals']==1
+    assert result['simulation_generated'] is False
+    assert data_status()['observation_count']==before
+    provenance=json.loads((target/'provenance.json').read_text())
+    assert provenance['records'][0]['source_timezone']=='Asia/Bangkok'
+    with psycopg.connect(database) as c:c.execute("UPDATE sources SET approval_status='rejected' WHERE id=%s",(SOURCE,))
+    with pytest.raises(ValueError,match='Approved'):export_observations('HII:TEST_ONLY','2019-12-31T17:00:00Z','2019-12-31T17:30:00Z',600,['N'],tmp_path/'revoked')
+    assert not (tmp_path/'revoked').exists()

@@ -60,6 +60,13 @@ jobs:
         env:
           POSTGRES_PASSWORD: test_only_password
           PUBLIC_DATA_ENABLED: 'false'
+      - name: Export real HII observations with original provenance
+        run: |
+          docker compose exec -T api python -m app.observation_export --station HII:CPY001 --start 2026-09-29T17:00:00Z --end 2026-09-30T17:00:00Z --interval-seconds 600 --accepted-flag N --destination /tmp/hii-validation-observations
+          docker compose exec -T api python -c "import json,pathlib,hashlib; from app.level_validation import load_series; from app.rainfall_input import timestamp; p=pathlib.Path('/tmp/hii-validation-observations'); raw=(p/'observations.csv').read_bytes(); d=json.loads((p/'observations-descriptor.json').read_text()); v=json.loads((p/'provenance.json').read_text()); assert hashlib.sha256(raw).hexdigest()==d['raw_sha256']; assert v['exported_rows']>0 and v['expected_intervals']==144; assert all(r['timestamp_status'].startswith('assumed') and r['source_timezone']=='Asia/Bangkok' for r in v['records']); assert 'Non-Commercial' in d['license_evidence']; rows=load_series(raw,d,{'HII:CPY001'},timestamp(v['window_start']),timestamp(v['window_end']),600); assert len(rows)==v['exported_rows']; print('Real HII observation export verified:',len(rows),'rows; original timezone assumptions retained; no simulation generated')"
+        env:
+          POSTGRES_PASSWORD: test_only_password
+          PUBLIC_DATA_ENABLED: 'false'
       - name: Show logs
         if: failure()
         run: docker compose logs --tail=100

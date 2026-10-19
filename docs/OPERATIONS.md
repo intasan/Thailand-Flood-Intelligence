@@ -82,3 +82,7 @@ See [PILOT_PREFLIGHT.md](PILOT_PREFLIGHT.md) to recheck consistent original inpu
 
 ## Station-level model comparison
 See [LEVEL_VALIDATION.md](LEVEL_VALIDATION.md) for exact-time local observed-versus-simulated elevation comparisons, source hashes, datum requirements and missingness-aware metric scope. No threshold, reviewer approval or signed schema-v2 evidence is generated automatically.
+
+
+## Export measured HII comparison inputs
+See [OBSERVATION_EXPORT.md](OBSERVATION_EXPORT.md). The operator CLI uses a read-only database snapshot, requires a new output directory and preserves original source/quality/time assumptions. It produces only the observation side of a comparison, not invented simulations or datum-alignment evidence. Source licence restrictions remain unchanged.
