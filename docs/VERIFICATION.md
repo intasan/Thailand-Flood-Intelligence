@@ -39,3 +39,18 @@ All four jobs completed successfully:
 HII history is monthly published archive data, not a live feed. Source timestamps lack an offset and retain an explicit Asia/Bangkok assumption. The MSL-to-EGM2008 transformation is unverified. Only N-flag data pass this import policy; this does not certify physical accuracy. Raw source files are not bundled into the source repository. The data licence remains non-commercial attribution as stated by the official catalog.
 
 No browser/WebGL/GPS visual-interaction test, live gauge feed, independently calibrated hydraulic pilot, property flood-risk calculation or hosted deployment has been completed. See PILOT_READINESS.md for concrete missing inputs. The passing software tests do not remove those scientific and data limitations.
+
+## v0.4 — signed evidence, raster integrity and readiness
+Tested code commit: `54b44e9a097706c725ed82488490f45f0af9265d`.
+Verified GitHub Actions run: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39300008517
+All four jobs completed successfully:
+- Backend: 43 passed against real PostGIS. Includes trusted-signature success, tampered manifest/evidence rejection, missing evidence, unknown/revoked signer, unsigned v1 rejection, duplicate JSON keys, invalid cells outside the sampled location, raster datum mismatch and mismatched depth/duration grids. Test signing keys are generated ephemerally; none are production trust anchors.
+- Frontend: coordinate tests, TypeScript and production build passed, including /readiness.
+- Compose: API/web/database startup and readiness/OpenAPI HTTP checks passed. Real HII import still inserted 4,304 accepted rows, quarantined 16, and returned 145 final-day archive observations through the Next proxy.
+- Pipeline: Airflow image and DAG imports passed.
+
+Local backend result was 40 passed / 3 database skips; remote CI ran all 43 without skips. Warning messages are dependency deprecations. Browser interaction/WebGL/GPS testing remains unexecuted.
+
+Schema-v2 review evidence and an external enabled Ed25519 reviewer key are now mandatory for research model outputs. No production reviewer or hydraulic package is configured. Integrity checks do not certify the reviewer or model physics; human verification remains required. No live-water adapter, surveyed pilot registry, public property-risk output or hosted deployment has been enabled.
+
+A direct HTTP check of the official October 2026 archive directory returned 200 with no CSV links at inspection. This records the observed archive state only and does not establish whether other agencies have live data. The platform continues to label historical data explicitly and reports the live feed as not_configured.
