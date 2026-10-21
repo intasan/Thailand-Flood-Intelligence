@@ -170,3 +170,16 @@ All four jobs passed:
 - Compose: full stack and actual HII import/export checks passed. The Airflow image was separately built, its temporary metadata database migrated, and `airflow dags test hii_observation_export` actually executed against PostGIS. The task exported 144 actual CPY001 observations with 144 accepted / 0 absent intervals, CSV SHA256 `046a5ac9ffe1eff847ae44804db3be1c3b148523918c6ea137cca98792bb3a54`, preserved source timezone assumptions and `simulation_generated=False`. The DagRun database state was independently checked as success and the exported file hash was verified.
 
 The observation-only Airflow path no longer eagerly loads GIS dependencies. The DAG is unscheduled and requires an explicit request ID/window/rights acknowledgement; existing exports are not reused. XCom/logs contain small receipts, not measured records or credentials. CI used temporary local container test volumes which were removed afterwards; no hosted scheduler, deployment or published dataset was enabled. There is still no calibrated operational hydraulic pilot or public property-risk forecast, and browser/WebGL/GPS QA remains outstanding.
+
+## Strict, shared source-metadata JSON parsing
+Tested code commit: `c064ff6f7190838cb6b0b5ef6d641d47ffc2d2b2`.
+Verified CI: https://github.com/intasan/Thailand-Flood-Intelligence/actions/runs/39559348461
+All four jobs passed:
+- Backend: 264 tests passed with real PostGIS. Twenty-nine new cases cover duplicate keys (including nested/Unicode-escaped equivalents), non-finite constants/numeric overflow, invalid roots/UTF-8/trailing content, bounded UTF-8 reads, quoted-brace-aware nesting limits, preserved valid values/BOMs, shared ingestion/evidence errors, actual CLI duplicate rejection, invalid provider responses never cached, unpaired surrogate rejection and valid paired-emoji preservation.
+- Frontend: existing 20 tests and production build passed; no frontend source changes.
+- Pipeline: Airflow image and DAG imports passed.
+- Compose: full stack and actual HII archive checks passed. The manual Airflow export DAG was actually executed again; it exported 144 accepted CPY001 observations with zero absent intervals and unchanged CSV SHA256 `046a5ac9ffe1eff847ae44804db3be1c3b148523918c6ea137cca98792bb3a54`. Its success state, output hash and original timezone assumptions were verified; no simulation was generated.
+
+The earlier local full run before the final three Unicode cases passed 256 tests with 5 database skips. After the execution environment changed, pytest/dependencies were unavailable locally; standard-library JSON smoke checks, syntax compilation and diff checks passed, and remote CI ran the complete 264-test suite without skips. No local pytest success is claimed for that refreshed environment.
+
+This change applies to backend source/metadata/evidence readers, not public FastAPI request decoding or browser GeoJSON parsing. Existing source byte limits remain; signed JSON files now share a 4 MB file cap and 64-container nesting limit. Valid source hashes/signatures remain checked against exact original bytes. Parsing success is not scientific certification or source-rights authentication. No deployment, calibrated hydraulic pilot or public property-risk forecast was added; browser/WebGL/GPS QA remains outstanding.
