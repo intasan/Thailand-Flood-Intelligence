@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from hashlib import sha256
 import io
 import json
+from .json_input import strict_json_loads
 import math
 from pathlib import Path
 
@@ -155,9 +156,9 @@ def main():
     try:
         raw = bounded_read(args.csv, 10_000_000)
         manifest_raw = bounded_read(args.manifest, 64000)
-        manifest = json.loads(manifest_raw)
+        manifest = strict_json_loads(manifest_raw)
         network_raw = bounded_read(args.network, 20_000_000)
-        network = json.loads(network_raw)
+        network = strict_json_loads(network_raw)
         report = prepare_rainfall(raw, manifest, network, sha256(network_raw).hexdigest())
         source_hash = sha256()
         with args.network_raw_source.open('rb') as f:

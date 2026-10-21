@@ -4,6 +4,7 @@ from collections import deque
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+from .json_input import strict_json_loads
 import math
 from pathlib import Path
 from pyproj import Geod
@@ -142,7 +143,7 @@ def main():
             raw = f.read(MAX_BYTES + 1)
         if len(raw) > MAX_BYTES:
             raise ValueError('Package exceeds 20 MB')
-        report = audit_network(json.loads(raw), args.tolerance_m)
+        report = audit_network(strict_json_loads(raw), args.tolerance_m)
         report['package_sha256'] = sha256(raw).hexdigest()
         digest = sha256()
         with args.raw_source.open('rb') as source:

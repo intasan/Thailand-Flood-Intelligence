@@ -3,6 +3,7 @@ import argparse
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+from .json_input import strict_json_loads
 import math
 from pathlib import Path
 import numpy as np
@@ -123,7 +124,7 @@ def main():
             raw=f.read(64001)
         if len(raw)>64000:
             raise ValueError('Manifest exceeds 64000 bytes')
-        report=audit_dem(args.raster,json.loads(raw))
+        report=audit_dem(args.raster,strict_json_loads(raw))
         report['manifest_sha256']=sha256(raw).hexdigest()
     except (ValueError,OSError,rasterio.errors.RasterioError,OverflowError) as e:
         parser.exit(2,f'DEM rejected: {e}\n')

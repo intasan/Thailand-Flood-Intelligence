@@ -1,4 +1,5 @@
 """Open-Meteo research adapters. Cached, bounded, no fabricated fallback."""
+from .json_input import strict_json_loads
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -49,7 +50,7 @@ def request_json(kind, params, client=None):
         db.execute('CREATE TABLE IF NOT EXISTS quota (bucket TEXT PRIMARY KEY, count INTEGER NOT NULL)')
         hit=db.execute('SELECT body,fetched FROM cache WHERE key=? AND fetched>?',(key,now-86400*7)).fetchone()
         if hit:
-            try:return validate_payload(kind,json.loads(hit[0])),datetime.fromtimestamp(hit[1],timezone.utc).isoformat(),True
+            try:return validate_payload(kind,strict_json_loads(hit[0],max_bytes=1_000_000)),datetime.fromtimestamp(hit[1],timezone.utc).isoformat(),True
             except (ValueError,TypeError):
                 db.execute('DELETE FROM cache WHERE key=?',(key,))
                 db.commit()
@@ -67,7 +68,7 @@ def request_json(kind, params, client=None):
         else:response=client.get(urls[kind],params=params)
         response.raise_for_status()
         if len(response.content)>1_000_000:raise ValueError('Upstream payload too large')
-        payload=validate_payload(kind,response.json())
+        payload=validate_payload(kind,strict_json_loads(response.content,max_bytes=1_000_000))
     except (httpx.HTTPError,ValueError,KeyError) as e:
         raise ProviderUnavailable('Upstream data unavailable; no substitute values used') from e
     with sqlite3.connect(path,timeout=3) as db:

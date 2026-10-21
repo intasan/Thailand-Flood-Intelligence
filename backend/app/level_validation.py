@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 import io
 import json
+from .json_input import strict_json_loads
 import math
 from pathlib import Path
 from .rainfall_input import timestamp, bounded_read, digest
@@ -134,7 +135,7 @@ def main():
     args=parser.parse_args()
     try:
         raw=bounded_read(args.manifest,64000)
-        report=compare_levels(bounded_read(args.observations,10_000_000),bounded_read(args.simulations,10_000_000),json.loads(raw))
+        report=compare_levels(bounded_read(args.observations,10_000_000),bounded_read(args.simulations,10_000_000),strict_json_loads(raw))
         report['manifest_sha256']=sha256(raw).hexdigest()
     except (ValueError,OSError,csv.Error,OverflowError) as e:
         parser.exit(2,f'Level comparison rejected: {e}\n')

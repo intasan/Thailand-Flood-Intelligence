@@ -90,3 +90,7 @@ See [OBSERVATION_EXPORT.md](OBSERVATION_EXPORT.md). The operator CLI uses a read
 
 ## Manual Airflow research export
 See [AIRFLOW_EXPORT.md](AIRFLOW_EXPORT.md). The unscheduled DAG requires explicit window/request ID/non-commercial acknowledgement, writes below the fixed research export root and returns only a small receipt. Repeating work needs a new request ID; automatic retries are disabled. Preserve needed export files before deleting Airflow volumes.
+
+
+## Strict metadata JSON
+See [JSON_INPUT.md](JSON_INPUT.md). Operator manifests and evidence now reject duplicate keys, non-finite constants/numeric overflow, non-object roots and nesting beyond 64 containers. Existing hashes/signatures are checked against original file bytes; valid source and approval rules are unchanged. Provider responses/cache objects share strict parsing and cannot silently resolve ambiguous duplicate fields.

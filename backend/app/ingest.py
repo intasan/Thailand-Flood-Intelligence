@@ -5,11 +5,12 @@ import json
 import os
 from pathlib import Path
 from .quality import validate_observation
+from .json_input import read_json_object
 
 
 def load_rows(csv_path, manifest_path):
     raw=Path(csv_path).read_bytes()
-    manifest=json.loads(Path(manifest_path).read_text())
+    manifest=read_json_object(manifest_path)
     for key in ('source_id','license_evidence','vertical_datum','source_url','approved_by'):
         if not manifest.get(key): raise ValueError(f'Missing {key}')
     if manifest.get('approval_status')!='approved': raise ValueError('Source not approved')

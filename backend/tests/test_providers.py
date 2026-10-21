@@ -60,3 +60,12 @@ def test_invalid_admin_object_rejected_before_ui_can_receive_it():
     bad={'results':[{'id':1,'name':'TEST','country_code':'TH','latitude':13,'longitude':100,'admin1':{'unexpected':'object'}}]}
     with httpx.Client(transport=httpx.MockTransport(lambda r:httpx.Response(200,json=bad))) as client:
         with pytest.raises(ProviderUnavailable):geocode('TEST',client)
+
+
+@pytest.mark.parametrize('raw',[b'{"elevation":[1],"elevation":[2]}',b'{"elevation":[1],"unused":1e400}',b'{"elevation":[1],"unused":NaN}'])
+def test_ambiguous_or_nonfinite_provider_json_never_cached(raw):
+    import os,sqlite3
+    with httpx.Client(transport=httpx.MockTransport(lambda r:httpx.Response(200,content=raw))) as client:
+        with pytest.raises(ProviderUnavailable):elevation(13,100,client)
+    with sqlite3.connect(os.environ['PROVIDER_CACHE_PATH']) as db:
+        assert db.execute('SELECT count(*) FROM cache').fetchone()[0]==0

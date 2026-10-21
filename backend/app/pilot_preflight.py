@@ -4,6 +4,7 @@ import csv
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+from .json_input import strict_json_loads
 import math
 from pathlib import Path
 import numpy as np
@@ -87,7 +88,7 @@ def coverage(raster, network):
 
 def audit_pilot(bundle_path):
     bundle_path=Path(bundle_path).resolve()
-    raw=bounded_read(bundle_path,64000);bundle=json.loads(raw)
+    raw=bounded_read(bundle_path,64000);bundle=strict_json_loads(raw)
     if not isinstance(bundle,dict) or type(bundle.get('schema_version')) is not int or bundle['schema_version']!=1:
         raise ValueError('Pilot schema_version=1 required')
     pilot=bundle.get('pilot_id')
@@ -105,15 +106,15 @@ def audit_pilot(bundle_path):
         if not path.is_relative_to(root) or not path.is_file():
             raise ValueError('Input paths must remain inside bundle directory and exist')
         paths[name]=path
-    network_raw=bounded_read(paths['network'],20_000_000);network=json.loads(network_raw)
+    network_raw=bounded_read(paths['network'],20_000_000);network=strict_json_loads(network_raw)
     rain_manifest_raw=bounded_read(paths['rainfall_manifest'],64000)
-    rainfall=prepare_rainfall(bounded_read(paths['rainfall_csv'],10_000_000),json.loads(rain_manifest_raw),network,sha256(network_raw).hexdigest())
+    rainfall=prepare_rainfall(bounded_read(paths['rainfall_csv'],10_000_000),strict_json_loads(rain_manifest_raw),network,sha256(network_raw).hexdigest())
     source_hash=file_hash(paths['network_raw_source'])
     if source_hash!=network['provenance']['raw_sha256']:
         raise ValueError('Network original source checksum mismatch')
     rainfall['network_raw_source_checksum']='matched'
     dem_manifest_raw=bounded_read(paths['dem_manifest'],64000)
-    dem=audit_dem(paths['dem'],json.loads(dem_manifest_raw))
+    dem=audit_dem(paths['dem'],strict_json_loads(dem_manifest_raw))
     terrain_coverage=coverage(paths['dem'],network)
     blockers=[]
     if rainfall['status']!='prepared_complete':blockers.append('rainfall_incomplete')

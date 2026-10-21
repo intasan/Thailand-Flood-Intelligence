@@ -1,19 +1,15 @@
 """Model evidence integrity checks. A trusted signature does not establish hydrologic validity."""
 import base64,hashlib,json,os
 from pathlib import Path
+from .json_input import read_json_object
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.exceptions import InvalidSignature
 
 class EvidenceRejected(ValueError):pass
 
 def strict_json(path):
-    def unique(pairs):
-        result={}
-        for k,v in pairs:
-            if k in result:raise EvidenceRejected('Duplicate JSON key')
-            result[k]=v
-        return result
-    return json.loads(Path(path).read_text(),object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(EvidenceRejected('Non-finite JSON constant')))
+    try:return read_json_object(path,max_bytes=4_000_000)
+    except ValueError as e:raise EvidenceRejected(str(e)) from e
 
 def canonical_manifest(manifest):
     return json.dumps({k:v for k,v in manifest.items() if k!='review_signature'},sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode('utf-8')
